@@ -199,13 +199,13 @@ struct ovsthread_aux {
 static void *
 ovsthread_wrapper(void *aux_)
 {
-    static atomic_uint next_id = ATOMIC_VAR_INIT(1);
+    static atomic_uint next_id = OF_ATOMIC_VAR_INIT(1);
 
     struct ovsthread_aux *auxp = aux_;
     struct ovsthread_aux aux;
     unsigned int id;
 
-    atomic_add(&next_id, 1, &id);
+    of_atomic_add(&next_id, 1, &id);
     *ovsthread_id_get() = id;
 
     aux = *auxp;
@@ -250,7 +250,7 @@ ovsthread_once_start__(struct ovsthread_once *once)
 void
 ovsthread_once_done(struct ovsthread_once *once)
 {
-    atomic_store(&once->done, true);
+    of_atomic_store(&once->done, true);
     ovs_mutex_unlock(&once->mutex);
 }
 

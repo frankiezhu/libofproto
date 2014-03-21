@@ -83,7 +83,7 @@ lib_libopenvswitch_a_SOURCES = \
 	lib/learning-switch.c \
 	lib/learning-switch.h \
 	lib/list.c \
-	lib/list.h \
+	lib/clist.h \
 	lib/lockfile.c \
 	lib/lockfile.h \
 	lib/mac-learning.c \

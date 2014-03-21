@@ -27,7 +27,7 @@
 #include "coverage.h"
 #include "dynamic-string.h"
 #include "fatal-signal.h"
-#include "list.h"
+#include "clist.h"
 #include "ovs-thread.h"
 #include "poll-loop.h"
 #include "signals.h"
@@ -41,7 +41,7 @@ COVERAGE_DEFINE(process_sigchld);
 COVERAGE_DEFINE(process_start);
 
 struct process {
-    struct list node;
+    struct clist node;
     char *name;
     pid_t pid;
 
@@ -54,7 +54,7 @@ struct process {
 static int fds[2];
 
 /* All processes. */
-static struct list all_processes = LIST_INITIALIZER(&all_processes);
+static struct clist all_processes = LIST_INITIALIZER(&all_processes);
 
 static void sigchld_handler(int signr OVS_UNUSED);
 

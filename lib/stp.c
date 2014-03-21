@@ -104,7 +104,7 @@ struct stp_port {
 };
 
 struct stp {
-    struct list node;               /* Node in all_stps list. */
+    struct clist node;               /* Node in all_stps list. */
 
     /* Static bridge data. */
     char *name;                     /* Human-readable name for log messages. */
@@ -145,8 +145,8 @@ struct stp {
 };
 
 static struct ovs_mutex mutex;
-static struct list all_stps__ = LIST_INITIALIZER(&all_stps__);
-static struct list *const all_stps OVS_GUARDED_BY(mutex) = &all_stps__;
+static struct clist all_stps__ = LIST_INITIALIZER(&all_stps__);
+static struct clist *const all_stps OVS_GUARDED_BY(mutex) = &all_stps__;
 
 #define FOR_EACH_ENABLED_PORT(PORT, STP)                        \
     for ((PORT) = stp_next_enabled_port((STP), (STP)->ports);   \
@@ -304,7 +304,7 @@ stp_create(const char *name, stp_identifier bridge_id,
         p->path_cost = 19;      /* Recommended default for 100 Mb/s link. */
         stp_initialize_port(p, STP_DISABLED);
     }
-    atomic_init(&stp->ref_cnt, 1);
+    of_atomic_init(&stp->ref_cnt, 1);
 
     list_push_back(all_stps, &stp->node);
     ovs_mutex_unlock(&mutex);
@@ -317,7 +317,7 @@ stp_ref(const struct stp *stp_)
     struct stp *stp = CONST_CAST(struct stp *, stp_);
     if (stp) {
         int orig;
-        atomic_add(&stp->ref_cnt, 1, &orig);
+        of_atomic_add(&stp->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return stp;
@@ -333,7 +333,7 @@ stp_unref(struct stp *stp)
         return;
     }
 
-    atomic_sub(&stp->ref_cnt, 1, &orig);
+    of_atomic_sub(&stp->ref_cnt, 1, &orig);
     ovs_assert(orig > 0);
     if (orig == 1) {
         ovs_mutex_lock(&mutex);

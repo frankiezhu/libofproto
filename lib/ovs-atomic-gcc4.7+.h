@@ -69,43 +69,43 @@ typedef enum {
     memory_order_seq_cst = __ATOMIC_SEQ_CST
 } memory_order;
 
-#define ATOMIC_VAR_INIT(VALUE) (VALUE)
-#define atomic_init(OBJECT, VALUE) (*(OBJECT) = (VALUE), (void) 0)
+#define OF_ATOMIC_VAR_INIT(VALUE) (VALUE)
+#define of_atomic_init(OBJECT, VALUE) (*(OBJECT) = (VALUE), (void) 0)
 
 #define atomic_thread_fence __atomic_thread_fence
 #define atomic_signal_fence __atomic_signal_fence
-#define atomic_is_lock_free __atomic_is_lock_free
+#define of_atomic_is_lock_free __of_atomic_is_lock_free
 
-#define atomic_store(DST, SRC) \
-    atomic_store_explicit(DST, SRC, memory_order_seq_cst)
-#define atomic_store_explicit __atomic_store_n
+#define of_atomic_store(DST, SRC) \
+    of_atomic_store_explicit(DST, SRC, memory_order_seq_cst)
+#define of_atomic_store_explicit __of_atomic_store_n
 
-#define atomic_read(SRC, DST) \
-    atomic_read_explicit(SRC, DST, memory_order_seq_cst)
-#define atomic_read_explicit(SRC, DST, ORDER)   \
+#define of_atomic_read(SRC, DST) \
+    of_atomic_read_explicit(SRC, DST, memory_order_seq_cst)
+#define of_atomic_read_explicit(SRC, DST, ORDER)   \
     (*(DST) = __atomic_load_n(SRC, ORDER),      \
      (void) 0)
 
-#define atomic_add(RMW, OPERAND, ORIG) \
-        atomic_add_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
-#define atomic_sub(RMW, OPERAND, ORIG) \
-        atomic_sub_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
-#define atomic_or(RMW, OPERAND, ORIG) \
-        atomic_or_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
-#define atomic_xor(RMW, OPERAND, ORIG) \
-        atomic_xor_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
-#define atomic_and(RMW, OPERAND, ORIG) \
-        atomic_and_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
+#define of_atomic_add(RMW, OPERAND, ORIG) \
+        of_atomic_add_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
+#define of_atomic_sub(RMW, OPERAND, ORIG) \
+        of_atomic_sub_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
+#define of_atomic_or(RMW, OPERAND, ORIG) \
+        of_atomic_or_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
+#define of_atomic_xor(RMW, OPERAND, ORIG) \
+        of_atomic_xor_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
+#define of_atomic_and(RMW, OPERAND, ORIG) \
+        of_atomic_and_explicit(RMW, OPERAND, ORIG, memory_order_seq_cst)
 
-#define atomic_add_explicit(RMW, OPERAND, ORIG, ORDER)  \
+#define of_atomic_add_explicit(RMW, OPERAND, ORIG, ORDER)  \
     (*(ORIG) = __atomic_fetch_add(RMW, OPERAND, ORDER), (void) 0)
-#define atomic_sub_explicit(RMW, OPERAND, ORIG, ORDER)  \
+#define of_atomic_sub_explicit(RMW, OPERAND, ORIG, ORDER)  \
     (*(ORIG) = __atomic_fetch_sub(RMW, OPERAND, ORDER), (void) 0)
-#define atomic_or_explicit(RMW, OPERAND, ORIG, ORDER)  \
+#define of_atomic_or_explicit(RMW, OPERAND, ORIG, ORDER)  \
     (*(ORIG) = __atomic_fetch_or(RMW, OPERAND, ORDER), (void) 0)
-#define atomic_xor_explicit(RMW, OPERAND, ORIG, ORDER)  \
+#define of_atomic_xor_explicit(RMW, OPERAND, ORIG, ORDER)  \
     (*(ORIG) = __atomic_fetch_xor(RMW, OPERAND, ORDER), (void) 0)
-#define atomic_and_explicit(RMW, OPERAND, ORIG, ORDER)  \
+#define of_atomic_and_explicit(RMW, OPERAND, ORIG, ORDER)  \
     (*(ORIG) = __atomic_fetch_and(RMW, OPERAND, ORDER), (void) 0)
 
 #include "ovs-atomic-flag-gcc4.7+.h"

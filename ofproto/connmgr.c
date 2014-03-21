@@ -59,7 +59,7 @@ static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(1, 5);
 struct ofconn {
 /* Configuration that persists from one connection to the next. */
 
-    struct list node;           /* In struct connmgr's "all_conns" list. */
+    struct clist node;           /* In struct connmgr's "all_conns" list. */
     struct hmap_node hmap_node; /* In struct connmgr's "controllers" map. */
 
     struct connmgr *connmgr;    /* Connection's manager. */
@@ -76,7 +76,7 @@ struct ofconn {
     enum nx_packet_in_format packet_in_format; /* OFPT_PACKET_IN format. */
 
     /* Asynchronous flow table operation support. */
-    struct list opgroups;       /* Contains pending "ofopgroups", if any. */
+    struct clist opgroups;       /* Contains pending "ofopgroups", if any. */
     struct ofpbuf *blocked;     /* Postponed OpenFlow message, if any. */
     bool retry;                 /* True if 'blocked' is ready to try again. */
 
@@ -129,7 +129,7 @@ struct ofconn {
      *
      * When 'updates' is nonempty, 'sent_abbrev_update' is true if 'updates'
      * contains an update event of type NXFME_ABBREV and false otherwise.. */
-    struct list updates OVS_GUARDED_BY(ofproto_mutex);
+    struct clist updates OVS_GUARDED_BY(ofproto_mutex);
     bool sent_abbrev_update OVS_GUARDED_BY(ofproto_mutex);
 };
 
@@ -189,7 +189,7 @@ struct connmgr {
 
     /* OpenFlow connections. */
     struct hmap controllers;   /* Controller "struct ofconn"s. */
-    struct list all_conns;     /* Contains "struct ofconn"s. */
+    struct clist all_conns;     /* Contains "struct ofconn"s. */
     uint64_t master_election_id; /* monotonically increasing sequence number
                                   * for master election */
     bool master_election_id_defined;
@@ -1053,7 +1053,7 @@ ofconn_send_reply(const struct ofconn *ofconn, struct ofpbuf *msg)
 /* Sends each of the messages in list 'replies' on 'ofconn' in order,
  * accounting them as replies. */
 void
-ofconn_send_replies(const struct ofconn *ofconn, struct list *replies)
+ofconn_send_replies(const struct ofconn *ofconn, struct clist *replies)
 {
     struct ofpbuf *reply, *next;
 
@@ -1116,7 +1116,7 @@ ofconn_has_pending_opgroups(const struct ofconn *ofconn)
  * The client may also remove ofconn_node from the list itself, with
  * list_remove(). */
 void
-ofconn_add_opgroup(struct ofconn *ofconn, struct list *ofconn_node)
+ofconn_add_opgroup(struct ofconn *ofconn, struct clist *ofconn_node)
 {
     list_push_back(&ofconn->opgroups, ofconn_node);
 }
@@ -2017,7 +2017,7 @@ ofmonitor_resume(struct ofconn *ofconn)
     struct rule_collection rules;
     struct ofpbuf *resumed;
     struct ofmonitor *m;
-    struct list msgs;
+    struct clist msgs;
 
     rule_collection_init(&rules);
     HMAP_FOR_EACH (m, ofconn_node, &ofconn->monitors) {

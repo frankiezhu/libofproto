@@ -888,7 +888,7 @@ vconn_transact_noreply(struct vconn *vconn, struct ofpbuf *request,
  * All of the requests on 'requests' are always destroyed, regardless of the
  * return value. */
 int
-vconn_transact_multiple_noreply(struct vconn *vconn, struct list *requests,
+vconn_transact_multiple_noreply(struct vconn *vconn, struct clist *requests,
                                 struct ofpbuf **replyp)
 {
     struct ofpbuf *request, *next;

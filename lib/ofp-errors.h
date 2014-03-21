@@ -24,6 +24,11 @@
 #include "openflow/openflow.h"
 #define VGW_JINDYLIU
 
+#if defined __cplusplus
+extern "C"
+{
+#endif
+
 struct ds;
 struct ofpbuf;
 
@@ -600,5 +605,9 @@ const char *ofperr_get_description(enum ofperr);
 
 void ofperr_format(struct ds *, enum ofperr);
 const char *ofperr_to_string(enum ofperr);
+
+#if defined __cplusplus
+}
+#endif
 
 #endif /* ofp-errors.h */

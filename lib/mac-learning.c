@@ -23,7 +23,7 @@
 #include "bitmap.h"
 #include "coverage.h"
 #include "hash.h"
-#include "list.h"
+#include "clist.h"
 #include "poll-loop.h"
 #include "timeval.h"
 #include "unaligned.h"
@@ -54,7 +54,7 @@ mac_table_hash(const struct mac_learning *ml, const uint8_t mac[ETH_ADDR_LEN],
 }
 
 static struct mac_entry *
-mac_entry_from_lru_node(struct list *list)
+mac_entry_from_lru_node(struct clist *list)
 {
     return CONTAINER_OF(list, struct mac_entry, lru_node);
 }
@@ -114,7 +114,7 @@ mac_learning_create(unsigned int idle_time)
     ml->idle_time = normalize_idle_time(idle_time);
     ml->max_entries = MAC_DEFAULT_MAX;
     ml->need_revalidate = false;
-    atomic_init(&ml->ref_cnt, 1);
+    of_atomic_init(&ml->ref_cnt, 1);
     ovs_rwlock_init(&ml->rwlock);
     return ml;
 }
@@ -125,7 +125,7 @@ mac_learning_ref(const struct mac_learning *ml_)
     struct mac_learning *ml = CONST_CAST(struct mac_learning *, ml_);
     if (ml) {
         int orig;
-        atomic_add(&ml->ref_cnt, 1, &orig);
+        of_atomic_add(&ml->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return ml;
@@ -141,7 +141,7 @@ mac_learning_unref(struct mac_learning *ml)
         return;
     }
 
-    atomic_sub(&ml->ref_cnt, 1, &orig);
+    of_atomic_sub(&ml->ref_cnt, 1, &orig);
     ovs_assert(orig > 0);
     if (orig == 1) {
         struct mac_entry *e, *next;

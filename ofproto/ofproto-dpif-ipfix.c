@@ -22,7 +22,7 @@
 #include "flow.h"
 #include "hash.h"
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "ofpbuf.h"
 #include "ofproto.h"
 #include "packets.h"
@@ -46,7 +46,7 @@ struct dpif_ipfix_exporter {
     uint32_t seq_number;
     time_t last_template_set_time;
     struct hmap cache_flow_key_map;  /* ipfix_flow_cache_entry. */
-    struct list cache_flow_start_timestamp_list;  /* ipfix_flow_cache_entry. */
+    struct clist cache_flow_start_timestamp_list;  /* ipfix_flow_cache_entry. */
     uint32_t cache_active_timeout;  /* In seconds. */
     uint32_t cache_max_flows;
 };
@@ -273,7 +273,7 @@ struct ipfix_flow_key {
 /* Flow cache entry. */
 struct ipfix_flow_cache_entry {
     struct hmap_node flow_key_map_node;
-    struct list cache_flow_start_timestamp_list_node;
+    struct clist cache_flow_start_timestamp_list_node;
     struct ipfix_flow_key flow_key;
     /* Common aggregated elements. */
     uint64_t flow_start_timestamp_usec;
@@ -639,7 +639,7 @@ dpif_ipfix_create(void)
     di = xzalloc(sizeof *di);
     dpif_ipfix_bridge_exporter_init(&di->bridge_exporter);
     hmap_init(&di->flow_exporter_map);
-    atomic_init(&di->ref_cnt, 1);
+    of_atomic_init(&di->ref_cnt, 1);
     return di;
 }
 
@@ -649,7 +649,7 @@ dpif_ipfix_ref(const struct dpif_ipfix *di_)
     struct dpif_ipfix *di = CONST_CAST(struct dpif_ipfix *, di_);
     if (di) {
         int orig;
-        atomic_add(&di->ref_cnt, 1, &orig);
+        of_atomic_add(&di->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return di;
@@ -689,7 +689,7 @@ dpif_ipfix_unref(struct dpif_ipfix *di) OVS_EXCLUDED(mutex)
         return;
     }
 
-    atomic_sub(&di->ref_cnt, 1, &orig);
+    of_atomic_sub(&di->ref_cnt, 1, &orig);
     ovs_assert(orig > 0);
     if (orig == 1) {
         ovs_mutex_lock(&mutex);

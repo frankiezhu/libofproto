@@ -8,7 +8,7 @@ AR = ar
 ARFLAGS = cru
 INC = -I ./lib -I ./include -I .
 LDFLAGS += -lpthread -lssl -lrt -lm
-CFLAGS += -Wall -g -O0 $(INC)
+CFLAGS += -Wall -g -O0 $(INC) -fPIC
 
 SRCS=$(wildcard lib/*.c)
 SRCS+=$(wildcard ofproto/*.c)
@@ -21,6 +21,7 @@ $(OBJ):$(OBJS)
 
 $(TARGET):$(OBJS)
 	$(AR) $(ARFLAGS) $@ $^
+	cp $@ ../ -f
 
 all:$(TARGET)
 

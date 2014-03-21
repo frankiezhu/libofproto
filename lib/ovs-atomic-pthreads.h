@@ -80,8 +80,8 @@ typedef enum {
     memory_order_seq_cst
 } memory_order;
 
-#define ATOMIC_VAR_INIT(VALUE) { VALUE, PTHREAD_MUTEX_INITIALIZER }
-#define atomic_init(OBJECT, VALUE)                      \
+#define OF_ATOMIC_VAR_INIT(VALUE) { VALUE, PTHREAD_MUTEX_INITIALIZER }
+#define of_atomic_init(OBJECT, VALUE)                      \
     ((OBJECT)->value = (VALUE),                         \
      pthread_mutex_init(&(OBJECT)->mutex, NULL),        \
      (void) 0)
@@ -98,23 +98,23 @@ atomic_signal_fence(memory_order order OVS_UNUSED)
     /* Nothing to do. */
 }
 
-#define atomic_is_lock_free(OBJ) false
+#define of_atomic_is_lock_free(OBJ) false
 
-#define atomic_store(DST, SRC)                  \
+#define of_atomic_store(DST, SRC)                  \
     (pthread_mutex_lock(&(DST)->mutex),         \
      (DST)->value = (SRC),                      \
      pthread_mutex_unlock(&(DST)->mutex),       \
      (void) 0)
-#define atomic_store_explicit(DST, SRC, ORDER) \
-    ((void) (ORDER), atomic_store(DST, SRC))
+#define of_atomic_store_explicit(DST, SRC, ORDER) \
+    ((void) (ORDER), of_atomic_store(DST, SRC))
 
-#define atomic_read(SRC, DST)                                           \
+#define of_atomic_read(SRC, DST)                                           \
     (pthread_mutex_lock(CONST_CAST(pthread_mutex_t *, &(SRC)->mutex)),  \
      *(DST) = (SRC)->value,                                             \
      pthread_mutex_unlock(CONST_CAST(pthread_mutex_t *, &(SRC)->mutex)), \
      (void) 0)
-#define atomic_read_explicit(SRC, DST, ORDER)   \
-    ((void) (ORDER), atomic_read(SRC, DST))
+#define of_atomic_read_explicit(SRC, DST, ORDER)   \
+    ((void) (ORDER), of_atomic_read(SRC, DST))
 
 #define atomic_op__(RMW, OPERATOR, OPERAND, ORIG)       \
     (pthread_mutex_lock(&(RMW)->mutex),                 \
@@ -123,33 +123,33 @@ atomic_signal_fence(memory_order order OVS_UNUSED)
      pthread_mutex_unlock(&(RMW)->mutex),               \
      (void) 0)
 
-#define atomic_add(RMW, OPERAND, ORIG) atomic_op__(RMW, +=, OPERAND, ORIG)
-#define atomic_sub(RMW, OPERAND, ORIG) atomic_op__(RMW, -=, OPERAND, ORIG)
-#define atomic_or( RMW, OPERAND, ORIG) atomic_op__(RMW, |=, OPERAND, ORIG)
-#define atomic_xor(RMW, OPERAND, ORIG) atomic_op__(RMW, ^=, OPERAND, ORIG)
-#define atomic_and(RMW, OPERAND, ORIG) atomic_op__(RMW, &=, OPERAND, ORIG)
+#define of_atomic_add(RMW, OPERAND, ORIG) atomic_op__(RMW, +=, OPERAND, ORIG)
+#define of_atomic_sub(RMW, OPERAND, ORIG) atomic_op__(RMW, -=, OPERAND, ORIG)
+#define of_atomic_or( RMW, OPERAND, ORIG) atomic_op__(RMW, |=, OPERAND, ORIG)
+#define of_atomic_xor(RMW, OPERAND, ORIG) atomic_op__(RMW, ^=, OPERAND, ORIG)
+#define of_atomic_and(RMW, OPERAND, ORIG) atomic_op__(RMW, &=, OPERAND, ORIG)
 
-#define atomic_add_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_add(RMW, OPERAND, ORIG))
-#define atomic_sub_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_sub(RMW, OPERAND, ORIG))
-#define atomic_or_explicit(RMW, OPERAND, ORIG, ORDER)   \
-    ((void) (ORDER), atomic_or(RMW, OPERAND, ORIG))
-#define atomic_xor_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_xor(RMW, OPERAND, ORIG))
-#define atomic_and_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_and(RMW, OPERAND, ORIG))
+#define of_atomic_add_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_add(RMW, OPERAND, ORIG))
+#define of_atomic_sub_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_sub(RMW, OPERAND, ORIG))
+#define of_atomic_or_explicit(RMW, OPERAND, ORIG, ORDER)   \
+    ((void) (ORDER), of_atomic_or(RMW, OPERAND, ORIG))
+#define of_atomic_xor_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_xor(RMW, OPERAND, ORIG))
+#define of_atomic_and_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_and(RMW, OPERAND, ORIG))
 
-/* atomic_flag */
+/* of_atomic_flag */
 
 typedef struct {
     bool b;
     pthread_mutex_t mutex;
-} atomic_flag;
-#define ATOMIC_FLAG_INIT { false, PTHREAD_MUTEX_INITIALIZER }
+} of_atomic_flag;
+#define OF_ATOMIC_FLAG_INIT { false, PTHREAD_MUTEX_INITIALIZER }
 
-bool atomic_flag_test_and_set(volatile atomic_flag *);
-bool atomic_flag_test_and_set_explicit(volatile atomic_flag *, memory_order);
+bool of_atomic_flag_test_and_set(volatile of_atomic_flag *);
+bool of_atomic_flag_test_and_set_explicit(volatile of_atomic_flag *, memory_order);
 
-void atomic_flag_clear(volatile atomic_flag *);
-void atomic_flag_clear_explicit(volatile atomic_flag *, memory_order);
+void of_atomic_flag_clear(volatile of_atomic_flag *);
+void of_atomic_flag_clear_explicit(volatile of_atomic_flag *, memory_order);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 #include <config.h>
-#include "list.h"
+#include "clist.h"
 
 /* Initializes 'list' as an empty list. */
 void
-list_init(struct list *list)
+list_init(struct clist *list)
 {
     list->next = list->prev = list;
 }
@@ -26,14 +26,14 @@ list_init(struct list *list)
 /* Initializes 'list' with pointers that will (probably) cause segfaults if
  * dereferenced and, better yet, show up clearly in a debugger. */
 void
-list_poison(struct list *list)
+list_poison(struct clist *list)
 {
     memset(list, 0xcc, sizeof *list);
 }
 
 /* Inserts 'elem' just before 'before'. */
 void
-list_insert(struct list *before, struct list *elem)
+list_insert(struct clist *before, struct clist *elem)
 {
     elem->prev = before->prev;
     elem->next = before;
@@ -44,7 +44,7 @@ list_insert(struct list *before, struct list *elem)
 /* Removes elements 'first' though 'last' (exclusive) from their current list,
    then inserts them just before 'before'. */
 void
-list_splice(struct list *before, struct list *first, struct list *last)
+list_splice(struct clist *before, struct clist *first, struct clist *last)
 {
     if (first == last) {
         return;
@@ -65,7 +65,7 @@ list_splice(struct list *before, struct list *first, struct list *last)
 /* Inserts 'elem' at the beginning of 'list', so that it becomes the front in
    'list'. */
 void
-list_push_front(struct list *list, struct list *elem)
+list_push_front(struct clist *list, struct clist *elem)
 {
     list_insert(list->next, elem);
 }
@@ -73,7 +73,7 @@ list_push_front(struct list *list, struct list *elem)
 /* Inserts 'elem' at the end of 'list', so that it becomes the back in
  * 'list'. */
 void
-list_push_back(struct list *list, struct list *elem)
+list_push_back(struct clist *list, struct clist *elem)
 {
     list_insert(list, elem);
 }
@@ -81,7 +81,7 @@ list_push_back(struct list *list, struct list *elem)
 /* Puts 'elem' in the position currently occupied by 'position'.
  * Afterward, 'position' is not part of a list. */
 void
-list_replace(struct list *element, const struct list *position)
+list_replace(struct clist *element, const struct clist *position)
 {
     element->next = position->next;
     element->next->prev = element;
@@ -96,7 +96,7 @@ list_replace(struct list *element, const struct list *position)
  * of a non-empty list.  It fails badly, however, if 'list' is the head of an
  * empty list; just use list_init() in that case. */
 void
-list_moved(struct list *list)
+list_moved(struct clist *list)
 {
     list->prev->next = list->next->prev = list;
 }
@@ -105,7 +105,7 @@ list_moved(struct list *list)
  * around in memory.  The effect is that, if 'src' was the head of a list, now
  * 'dst' is the head of a list containing the same elements. */
 void
-list_move(struct list *dst, struct list *src)
+list_move(struct clist *dst, struct clist *src)
 {
     if (!list_is_empty(src)) {
         *dst = *src;
@@ -117,8 +117,8 @@ list_move(struct list *dst, struct list *src)
 
 /* Removes 'elem' from its list and returns the element that followed it.
    Undefined behavior if 'elem' is not in a list. */
-struct list *
-list_remove(struct list *elem)
+struct clist *
+list_remove(struct clist *elem)
 {
     elem->prev->next = elem->next;
     elem->next->prev = elem->prev;
@@ -127,30 +127,30 @@ list_remove(struct list *elem)
 
 /* Removes the front element from 'list' and returns it.  Undefined behavior if
    'list' is empty before removal. */
-struct list *
-list_pop_front(struct list *list)
+struct clist *
+list_pop_front(struct clist *list)
 {
-    struct list *front = list->next;
+    struct clist *front = list->next;
     list_remove(front);
     return front;
 }
 
 /* Removes the back element from 'list' and returns it.
    Undefined behavior if 'list' is empty before removal. */
-struct list *
-list_pop_back(struct list *list)
+struct clist *
+list_pop_back(struct clist *list)
 {
-    struct list *back = list->prev;
+    struct clist *back = list->prev;
     list_remove(back);
     return back;
 }
 
 /* Returns the front element in 'list_'.
    Undefined behavior if 'list_' is empty. */
-struct list *
-list_front(const struct list *list_)
+struct clist *
+list_front(const struct clist *list_)
 {
-    struct list *list = CONST_CAST(struct list *, list_);
+    struct clist *list = CONST_CAST(struct clist *, list_);
 
     ovs_assert(!list_is_empty(list));
     return list->next;
@@ -158,10 +158,10 @@ list_front(const struct list *list_)
 
 /* Returns the back element in 'list_'.
    Undefined behavior if 'list_' is empty. */
-struct list *
-list_back(const struct list *list_)
+struct clist *
+list_back(const struct clist *list_)
 {
-    struct list *list = CONST_CAST(struct list *, list_);
+    struct clist *list = CONST_CAST(struct clist *, list_);
 
     ovs_assert(!list_is_empty(list));
     return list->prev;
@@ -170,9 +170,9 @@ list_back(const struct list *list_)
 /* Returns the number of elements in 'list'.
    Runs in O(n) in the number of elements. */
 size_t
-list_size(const struct list *list)
+list_size(const struct clist *list)
 {
-    const struct list *e;
+    const struct clist *e;
     size_t cnt = 0;
 
     for (e = list->next; e != list; e = e->next) {
@@ -183,21 +183,21 @@ list_size(const struct list *list)
 
 /* Returns true if 'list' is empty, false otherwise. */
 bool
-list_is_empty(const struct list *list)
+list_is_empty(const struct clist *list)
 {
     return list->next == list;
 }
 
 /* Returns true if 'list' has exactly 1 element, false otherwise. */
 bool
-list_is_singleton(const struct list *list)
+list_is_singleton(const struct clist *list)
 {
     return list_is_short(list) && !list_is_empty(list);
 }
 
 /* Returns true if 'list' has 0 or 1 elements, false otherwise. */
 bool
-list_is_short(const struct list *list)
+list_is_short(const struct clist *list)
 {
     return list->next == list->prev;
 }

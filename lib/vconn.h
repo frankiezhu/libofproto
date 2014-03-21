@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-struct list;
+struct clist;
 struct ofpbuf;
 struct pvconn;
 struct vconn;
@@ -56,7 +56,7 @@ int vconn_send(struct vconn *, struct ofpbuf *);
 int vconn_recv_xid(struct vconn *, ovs_be32 xid, struct ofpbuf **);
 int vconn_transact(struct vconn *, struct ofpbuf *, struct ofpbuf **);
 int vconn_transact_noreply(struct vconn *, struct ofpbuf *, struct ofpbuf **);
-int vconn_transact_multiple_noreply(struct vconn *, struct list *requests,
+int vconn_transact_multiple_noreply(struct vconn *, struct clist *requests,
                                     struct ofpbuf **replyp);
 
 void vconn_run(struct vconn *);

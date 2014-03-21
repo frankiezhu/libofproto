@@ -43,7 +43,7 @@
 #include "util.h"
 #define VGW_JINDYLIU
 
-struct list;
+struct clist;
 
 /* Raw identifiers for OpenFlow messages.
  *
@@ -620,12 +620,12 @@ const void *ofpmsg_body(const struct ofp_header *);
  * within 64 kB doesn't need any special treatment, so you might as well use
  * the ofpraw_alloc_*() functions.
  *
- * These functions work with a "struct list" of "struct ofpbuf"s, each of
+ * These functions work with a "struct clist" of "struct ofpbuf"s, each of
  * which represents one part of a multipart message. */
-void ofpmp_init(struct list *, const struct ofp_header *request);
-struct ofpbuf *ofpmp_reserve(struct list *, size_t len);
-void *ofpmp_append(struct list *, size_t len);
-void ofpmp_postappend(struct list *, size_t start_ofs);
+void ofpmp_init(struct clist *, const struct ofp_header *request);
+struct ofpbuf *ofpmp_reserve(struct clist *, size_t len);
+void *ofpmp_append(struct clist *, size_t len);
+void ofpmp_postappend(struct clist *, size_t start_ofs);
 
 /* Decoding multipart replies. */
 uint16_t ofpmp_flags(const struct ofp_header *);

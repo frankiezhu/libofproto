@@ -436,7 +436,7 @@ struct ovsthread_once {
 
 #define OVSTHREAD_ONCE_INITIALIZER              \
     {                                           \
-        ATOMIC_VAR_INIT(false),                 \
+        OF_ATOMIC_VAR_INIT(false),                 \
         OVS_MUTEX_INITIALIZER,                  \
     }
 
@@ -453,7 +453,7 @@ ovsthread_once_is_done__(struct ovsthread_once *once)
 {
     bool done;
 
-    atomic_read_explicit(&once->done, &done, memory_order_relaxed);
+    of_atomic_read_explicit(&once->done, &done, memory_order_relaxed);
     return done;
 }
 

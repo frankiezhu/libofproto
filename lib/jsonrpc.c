@@ -24,7 +24,7 @@
 #include "dynamic-string.h"
 #include "fatal-signal.h"
 #include "json.h"
-#include "list.h"
+#include "clist.h"
 #include "ofpbuf.h"
 #include "ovs-thread.h"
 #include "poll-loop.h"
@@ -47,7 +47,7 @@ struct jsonrpc {
     struct jsonrpc_msg *received;
 
     /* Output. */
-    struct list output;         /* Contains "struct ofpbuf"s. */
+    struct clist output;         /* Contains "struct ofpbuf"s. */
     size_t backlog;
 };
 
@@ -515,10 +515,10 @@ jsonrpc_create(enum jsonrpc_msg_type type, const char *method,
 static struct json *
 jsonrpc_create_id(void)
 {
-    static atomic_uint next_id = ATOMIC_VAR_INIT(0);
+    static atomic_uint next_id = OF_ATOMIC_VAR_INIT(0);
     unsigned int id;
 
-    atomic_add(&next_id, 1, &id);
+    of_atomic_add(&next_id, 1, &id);
     return json_integer_create(id);
 }
 

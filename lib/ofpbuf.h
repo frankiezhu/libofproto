@@ -19,7 +19,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "list.h"
+#include "clist.h"
 #include "util.h"
 
 #ifdef  __cplusplus
@@ -48,7 +48,7 @@ struct ofpbuf {
     void *l4;                   /* Transport-level header. */
     void *l7;                   /* Application data. */
 
-    struct list list_node;      /* Private list element for use by owner. */
+    struct clist list_node;      /* Private list element for use by owner. */
     void *private_p;            /* Private pointer for use by owner. */
 };
 
@@ -101,11 +101,11 @@ void *ofpbuf_steal_data(struct ofpbuf *);
 
 char *ofpbuf_to_string(const struct ofpbuf *, size_t maxbytes);
 
-static inline struct ofpbuf *ofpbuf_from_list(const struct list *list)
+static inline struct ofpbuf *ofpbuf_from_list(const struct clist *list)
 {
     return CONTAINER_OF(list, struct ofpbuf, list_node);
 }
-void ofpbuf_list_delete(struct list *);
+void ofpbuf_list_delete(struct clist *);
 
 static inline bool
 ofpbuf_equal(const struct ofpbuf *a, const struct ofpbuf *b)

@@ -594,7 +594,7 @@ update_tables_after_insertion(struct classifier *cls, struct cls_table *table,
 
         /* Possibly move 'table' earlier in the priority list.  If we break out
          * of the loop, then 'table' should be moved just after that 'iter'.
-         * If the loop terminates normally, then 'iter' will be the list head
+         * If the loop terminates normally, then 'iter' will be the clist.head
          * and we'll move table just after that (e.g. to the front of the
          * list). */
         iter = table;
@@ -643,7 +643,7 @@ update_tables_after_removal(struct classifier *cls, struct cls_table *table,
 
         /* Possibly move 'table' later in the priority list.  If we break out
          * of the loop, then 'table' should be moved just before that 'iter'.
-         * If the loop terminates normally, then 'iter' will be the list head
+         * If the loop terminates normally, then 'iter' will be the clist.head
          * and we'll move table just before that (e.g. to the back of the
          * list). */
         iter = table;

@@ -17,7 +17,7 @@
 #define OVSDB_IDL_PROVIDER_H 1
 
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "ovsdb-idl.h"
 #include "ovsdb-types.h"
 #include "shash.h"
@@ -26,8 +26,8 @@
 struct ovsdb_idl_row {
     struct hmap_node hmap_node; /* In struct ovsdb_idl_table's 'rows'. */
     struct uuid uuid;           /* Row "_uuid" field. */
-    struct list src_arcs;       /* Forward arcs (ovsdb_idl_arc.src_node). */
-    struct list dst_arcs;       /* Backward arcs (ovsdb_idl_arc.dst_node). */
+    struct clist src_arcs;       /* Forward arcs (ovsdb_idl_arc.src_node). */
+    struct clist dst_arcs;       /* Backward arcs (ovsdb_idl_arc.dst_node). */
     struct ovsdb_idl_table *table; /* Containing table. */
     struct ovsdb_datum *old;    /* Committed data (null if orphaned). */
 

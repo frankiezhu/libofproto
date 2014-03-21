@@ -327,7 +327,7 @@ dpif_sflow_create(void)
     hmap_init(&ds->ports);
     ds->probability = 0;
     route_table_register();
-    atomic_init(&ds->ref_cnt, 1);
+    of_atomic_init(&ds->ref_cnt, 1);
 
     return ds;
 }
@@ -338,7 +338,7 @@ dpif_sflow_ref(const struct dpif_sflow *ds_)
     struct dpif_sflow *ds = CONST_CAST(struct dpif_sflow *, ds_);
     if (ds) {
         int orig;
-        atomic_add(&ds->ref_cnt, 1, &orig);
+        of_atomic_add(&ds->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return ds;
@@ -366,7 +366,7 @@ dpif_sflow_unref(struct dpif_sflow *ds) OVS_EXCLUDED(mutex)
         return;
     }
 
-    atomic_sub(&ds->ref_cnt, 1, &orig);
+    of_atomic_sub(&ds->ref_cnt, 1, &orig);
     ovs_assert(orig > 0);
     if (orig == 1) {
         struct dpif_sflow_port *dsp, *next;

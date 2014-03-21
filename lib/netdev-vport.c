@@ -30,7 +30,7 @@
 #include "dpif.h"
 #include "hash.h"
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "netdev-provider.h"
 #include "ofpbuf.h"
 #include "packets.h"

@@ -1782,7 +1782,7 @@ ofputil_put_bands(uint16_t n_bands, const struct ofputil_meter_band *mb,
 
 /* Encode a meter stat for 'mc' and append it to 'replies'. */
 void
-ofputil_append_meter_config(struct list *replies,
+ofputil_append_meter_config(struct clist *replies,
                             const struct ofputil_meter_config *mc)
 {
     struct ofpbuf *msg = ofpbuf_from_list(list_back(replies));
@@ -1800,7 +1800,7 @@ ofputil_append_meter_config(struct list *replies,
 
 /* Encode a meter stat for 'ms' and append it to 'replies'. */
 void
-ofputil_append_meter_stats(struct list *replies,
+ofputil_append_meter_stats(struct clist *replies,
                            const struct ofputil_meter_stats *ms)
 {
     struct ofp13_meter_stats *reply;
@@ -2489,7 +2489,7 @@ unknown_to_zero(uint64_t count)
  * have been initialized with ofputil_start_stats_reply(). */
 void
 ofputil_append_flow_stats_reply(const struct ofputil_flow_stats *fs,
-                                struct list *replies)
+                                struct clist *replies)
 {
     struct ofpbuf *reply = ofpbuf_from_list(list_back(replies));
     size_t start_ofs = reply->size;
@@ -3334,7 +3334,7 @@ ofputil_put_phy_port(enum ofp_version ofp_version,
 void
 ofputil_append_port_desc_stats_reply(enum ofp_version ofp_version,
                                      const struct ofputil_phy_port *pp,
-                                     struct list *replies)
+                                     struct clist *replies)
 {
     switch (ofp_version) {
     case OFP10_VERSION: {
@@ -4210,7 +4210,7 @@ ofputil_encode_flow_monitor_cancel(uint32_t id)
 }
 
 void
-ofputil_start_flow_update(struct list *replies)
+ofputil_start_flow_update(struct clist *replies)
 {
     struct ofpbuf *msg;
 
@@ -4223,7 +4223,7 @@ ofputil_start_flow_update(struct list *replies)
 
 void
 ofputil_append_flow_update(const struct ofputil_flow_update *update,
-                           struct list *replies)
+                           struct clist *replies)
 {
     struct nx_flow_update_header *nfuh;
     struct ofpbuf *msg;
@@ -4985,7 +4985,7 @@ ofputil_port_stats_to_ofp13(const struct ofputil_port_stats *ops,
 
 /* Encode a ports stat for 'ops' and append it to 'replies'. */
 void
-ofputil_append_port_stat(struct list *replies,
+ofputil_append_port_stat(struct clist *replies,
                          const struct ofputil_port_stats *ops)
 {
     struct ofpbuf *msg = ofpbuf_from_list(list_back(replies));
@@ -5437,7 +5437,7 @@ ofputil_queue_stats_to_ofp13(const struct ofputil_queue_stats *oqs,
 
 /* Encode a queue stat for 'oqs' and append it to 'replies'. */
 void
-ofputil_append_queue_stat(struct list *replies,
+ofputil_append_queue_stat(struct clist *replies,
                           const struct ofputil_queue_stats *oqs)
 {
     struct ofpbuf *msg = ofpbuf_from_list(list_back(replies));

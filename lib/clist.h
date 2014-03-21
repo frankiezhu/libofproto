@@ -22,40 +22,40 @@
 #include <stddef.h>
 #include "util.h"
 
-/* Doubly linked list head or element. */
-struct list {
-    struct list *prev;     /* Previous list element. */
-    struct list *next;     /* Next list element. */
+/* Doubly linked clist.head or element. */
+struct clist {
+    struct clist *prev;     /* Previous list element. */
+    struct clist *next;     /* Next list element. */
 };
 
 #define LIST_INITIALIZER(LIST) { LIST, LIST }
 
-void list_init(struct list *);
-void list_poison(struct list *);
+void list_init(struct clist *);
+void list_poison(struct clist *);
 
 /* List insertion. */
-void list_insert(struct list *, struct list *);
-void list_splice(struct list *before, struct list *first, struct list *last);
-void list_push_front(struct list *, struct list *);
-void list_push_back(struct list *, struct list *);
-void list_replace(struct list *, const struct list *);
-void list_moved(struct list *);
-void list_move(struct list *dst, struct list *src);
+void list_insert(struct clist *, struct clist *);
+void list_splice(struct clist *before, struct clist *first, struct clist *last);
+void list_push_front(struct clist *, struct clist *);
+void list_push_back(struct clist *, struct clist *);
+void list_replace(struct clist *, const struct clist *);
+void list_moved(struct clist *);
+void list_move(struct clist *dst, struct clist *src);
 
 /* List removal. */
-struct list *list_remove(struct list *);
-struct list *list_pop_front(struct list *);
-struct list *list_pop_back(struct list *);
+struct clist *list_remove(struct clist *);
+struct clist *list_pop_front(struct clist *);
+struct clist *list_pop_back(struct clist *);
 
 /* List elements. */
-struct list *list_front(const struct list *);
-struct list *list_back(const struct list *);
+struct clist *list_front(const struct clist *);
+struct clist *list_back(const struct clist *);
 
 /* List properties. */
-size_t list_size(const struct list *);
-bool list_is_empty(const struct list *);
-bool list_is_singleton(const struct list *);
-bool list_is_short(const struct list *);
+size_t list_size(const struct clist *);
+bool list_is_empty(const struct clist *);
+bool list_is_singleton(const struct clist *);
+bool list_is_short(const struct clist *);
 
 #define LIST_FOR_EACH(ITER, MEMBER, LIST)                               \
     for (ASSIGN_CONTAINER(ITER, (LIST)->next, MEMBER);                  \
@@ -80,4 +80,4 @@ bool list_is_short(const struct list *);
           : 0);                                                    \
          (ITER) = (NEXT))
 
-#endif /* list.h */
+#endif /* clist.h */

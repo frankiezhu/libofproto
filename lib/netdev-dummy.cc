@@ -21,7 +21,7 @@
 #include <errno.h>
 
 #include "flow.h"
-#include "list.h"
+#include "clist.h"
 #include "netdev-provider.h"
 #include "netdev-vport.h"
 #include "odp-util.h"
@@ -41,21 +41,21 @@ VLOG_DEFINE_THIS_MODULE(netdev_dummy);
 struct dummy_stream {
     struct stream *stream;
     struct ofpbuf rxbuf;
-    struct list txq;
+    struct clist txq;
 };
 
 /* Protects 'dummy_list'. */
 static struct ovs_mutex dummy_list_mutex = OVS_MUTEX_INITIALIZER;
 
 /* Contains all 'struct dummy_dev's. */
-static struct list dummy_list OVS_GUARDED_BY(dummy_list_mutex)
+static struct clist dummy_list OVS_GUARDED_BY(dummy_list_mutex)
     = LIST_INITIALIZER(&dummy_list);
 
 struct netdev_dummy {
     struct netdev up;
 
     /* In dummy_list. */
-    struct list list_node OVS_GUARDED_BY(dummy_list_mutex);
+    struct clist list_node OVS_GUARDED_BY(dummy_list_mutex);
 
     /* Protects all members below. */
     struct ovs_mutex mutex OVS_ACQ_AFTER(dummy_list_mutex);
@@ -71,7 +71,7 @@ struct netdev_dummy {
     struct dummy_stream *streams OVS_GUARDED;
     size_t n_streams OVS_GUARDED;
 
-    struct list rxes OVS_GUARDED; /* List of child "netdev_rx_dummy"s. */
+    struct clist rxes OVS_GUARDED; /* List of child "netdev_rx_dummy"s. */
 };
 
 /* Max 'recv_queue_len' in struct netdev_dummy. */
@@ -79,8 +79,8 @@ struct netdev_dummy {
 
 struct netdev_rx_dummy {
     struct netdev_rx up;
-    struct list node;           /* In netdev_dummy's "rxes" list. */
-    struct list recv_queue;
+    struct clist node;           /* In netdev_dummy's "rxes" list. */
+    struct clist recv_queue;
     int recv_queue_len;         /* list_size(&recv_queue). */
     bool listening;
 };
@@ -265,11 +265,11 @@ netdev_dummy_alloc(void)
 static int
 netdev_dummy_construct(struct netdev *netdev_)
 {
-    static atomic_uint next_n = ATOMIC_VAR_INIT(0xaa550000);
+    static atomic_uint next_n = OF_ATOMIC_VAR_INIT(0xaa550000);
     struct netdev_dummy *netdev = netdev_dummy_cast(netdev_);
     unsigned int n;
 
-    atomic_add(&next_n, 1, &n);
+    of_atomic_add(&next_n, 1, &n);
 
     ovs_mutex_init(&netdev->mutex);
     ovs_mutex_lock(&netdev->mutex);

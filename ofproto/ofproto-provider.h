@@ -38,7 +38,7 @@
 #include "guarded-list.h"
 #include "heap.h"
 #include "hindex.h"
-#include "list.h"
+#include "clist.h"
 #include "ofp-errors.h"
 #include "ofp-util.h"
 #include "ofproto/ofproto.h"
@@ -102,7 +102,7 @@ struct ofproto {
     struct hindex cookies OVS_GUARDED_BY(ofproto_mutex);
 
     /* List of expirable flows, in all flow tables. */
-    struct list expirable OVS_GUARDED_BY(ofproto_mutex);
+    struct clist expirable OVS_GUARDED_BY(ofproto_mutex);
 
     /* Meter table.
      * OpenFlow meters start at 1.  To avoid confusion we leave the first
@@ -126,7 +126,7 @@ struct ofproto {
      * 'deletions' contains pending ofoperations of type OFOPERATION_DELETE,
      * indexed on its rule's flow.*/
     int state;
-    struct list pending OVS_GUARDED_BY(ofproto_mutex);
+    struct clist pending OVS_GUARDED_BY(ofproto_mutex);
     unsigned int n_pending OVS_GUARDED_BY(ofproto_mutex);
     struct hmap deletions OVS_GUARDED_BY(ofproto_mutex);
 
@@ -375,7 +375,7 @@ struct rule {
     struct rule_actions *actions OVS_GUARDED;
 
     /* In owning meter's 'rules' list.  An empty list if there is no meter. */
-    struct list meter_list_node OVS_GUARDED_BY(ofproto_mutex);
+    struct clist meter_list_node OVS_GUARDED_BY(ofproto_mutex);
 
     /* Flow monitors (e.g. for NXST_FLOW_MONITOR, related to struct ofmonitor).
      *
@@ -388,7 +388,7 @@ struct rule {
 
     /* Optimisation for flow expiry.  In ofproto's 'expirable' list if this
      * rule is expirable, otherwise empty. */
-    struct list expirable OVS_GUARDED_BY(ofproto_mutex);
+    struct clist expirable OVS_GUARDED_BY(ofproto_mutex);
 };
 
 void ofproto_rule_ref(struct rule *);

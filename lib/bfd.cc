@@ -27,7 +27,7 @@
 #include "flow.h"
 #include "hash.h"
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "netdev.h"
 #include "netlink.h"
 #include "odp-util.h"
@@ -284,7 +284,7 @@ bfd_configure(struct bfd *bfd, const char *name, const struct smap *cfg,
               struct netdev *netdev) OVS_EXCLUDED(mutex)
 {
     static struct ovsthread_once once = OVSTHREAD_ONCE_INITIALIZER;
-    static atomic_uint16_t udp_src = ATOMIC_VAR_INIT(0);
+    static atomic_uint16_t udp_src = OF_ATOMIC_VAR_INIT(0);
 
     int decay_min_rx;
     long long int min_tx, min_rx;
@@ -319,7 +319,7 @@ bfd_configure(struct bfd *bfd, const char *name, const struct smap *cfg,
         bfd->diag = DIAG_NONE;
         bfd->min_tx = 1000;
         bfd->mult = 3;
-        atomic_init(&bfd->ref_cnt, 1);
+        of_atomic_init(&bfd->ref_cnt, 1);
         bfd->netdev = netdev_ref(netdev);
         bfd->rx_packets = bfd_rx_packets(bfd);
         bfd->in_decay = false;
@@ -329,7 +329,7 @@ bfd_configure(struct bfd *bfd, const char *name, const struct smap *cfg,
          * UDP source port number MUST be used for all BFD Control packets
          * associated with a particular session.  The source port number SHOULD
          * be unique among all BFD sessions on the system. */
-        atomic_add(&udp_src, 1, &bfd->udp_src);
+        of_atomic_add(&udp_src, 1, &bfd->udp_src);
         bfd->udp_src = (bfd->udp_src % 16384) + 49152;
 
         bfd_set_state(bfd, STATE_DOWN, DIAG_NONE);
@@ -337,7 +337,7 @@ bfd_configure(struct bfd *bfd, const char *name, const struct smap *cfg,
         memcpy(bfd->eth_dst, eth_addr_bfd, ETH_ADDR_LEN);
     }
 
-    atomic_store(&bfd->check_tnl_key,
+    of_atomic_store(&bfd->check_tnl_key,
                  smap_get_bool(cfg, "check_tnl_key", false));
     min_tx = smap_get_int(cfg, "min_tx", 100);
     min_tx = MAX(min_tx, 100);
@@ -418,7 +418,7 @@ bfd_ref(const struct bfd *bfd_)
     struct bfd *bfd = CONST_CAST(struct bfd *, bfd_);
     if (bfd) {
         int orig;
-        atomic_add(&bfd->ref_cnt, 1, &orig);
+        of_atomic_add(&bfd->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return bfd;
@@ -430,7 +430,7 @@ bfd_unref(struct bfd *bfd) OVS_EXCLUDED(mutex)
     if (bfd) {
         int orig;
 
-        atomic_sub(&bfd->ref_cnt, 1, &orig);
+        of_atomic_sub(&bfd->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
         if (orig == 1) {
             ovs_mutex_lock(&mutex);
@@ -592,7 +592,7 @@ bfd_should_process_flow(const struct bfd *bfd_, const struct flow *flow,
     memset(&wc->masks.nw_proto, 0xff, sizeof wc->masks.nw_proto);
     memset(&wc->masks.tp_dst, 0xff, sizeof wc->masks.tp_dst);
 
-    atomic_read(&bfd->check_tnl_key, &check_tnl_key);
+    of_atomic_read(&bfd->check_tnl_key, &check_tnl_key);
     if (check_tnl_key) {
         memset(&wc->masks.tunnel.tun_id, 0xff, sizeof wc->masks.tunnel.tun_id);
     }

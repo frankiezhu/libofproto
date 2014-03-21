@@ -38,7 +38,7 @@
 #include "dynamic-string.h"
 #include "flow.h"
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "netdev.h"
 #include "netdev-vport.h"
 #include "netlink.h"
@@ -102,14 +102,14 @@ struct dp_netdev {
 
     /* Ports. */
     struct dp_netdev_port *ports[MAX_PORTS];
-    struct list port_list;
+    struct clist port_list;
     struct seq *port_seq;       /* Incremented whenever a port changes. */
 };
 
 /* A port in a netdev-based datapath. */
 struct dp_netdev_port {
     odp_port_t port_no;         /* Index into dp_netdev's 'ports'. */
-    struct list node;           /* Element in dp_netdev's 'port_list'. */
+    struct clist node;           /* Element in dp_netdev's 'port_list'. */
     struct netdev *netdev;
     struct netdev_saved_flags *sf;
     struct netdev_rx *rx;

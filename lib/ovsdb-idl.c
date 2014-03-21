@@ -55,8 +55,8 @@ VLOG_DEFINE_THIS_MODULE(ovsdb_idl);
  * tables.
  */
 struct ovsdb_idl_arc {
-    struct list src_node;       /* In src->src_arcs list. */
-    struct list dst_node;       /* In dst->dst_arcs list. */
+    struct clist src_node;       /* In src->src_arcs list. */
+    struct clist dst_node;       /* In dst->dst_arcs list. */
     struct ovsdb_idl_row *src;  /* Source row. */
     struct ovsdb_idl_row *dst;  /* Destination row. */
 };

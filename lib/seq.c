@@ -23,7 +23,7 @@
 #include "hash.h"
 #include "hmap.h"
 #include "latch.h"
-#include "list.h"
+#include "clist.h"
 #include "ovs-thread.h"
 #include "poll-loop.h"
 
@@ -40,14 +40,14 @@ struct seq_waiter {
     unsigned int ovsthread_id OVS_GUARDED;  /* Key in 'waiters' hmap. */
 
     struct seq_thread *thread OVS_GUARDED; /* Thread preparing to wait. */
-    struct list list_node OVS_GUARDED;     /* In 'thread->waiters'. */
+    struct clist list_node OVS_GUARDED;     /* In 'thread->waiters'. */
 
     uint64_t value OVS_GUARDED; /* seq->value we're waiting to change. */
 };
 
 /* A thread that might be waiting on one or more seqs. */
 struct seq_thread {
-    struct list waiters OVS_GUARDED; /* Contains 'struct seq_waiter's. */
+    struct clist waiters OVS_GUARDED; /* Contains 'struct seq_waiter's. */
     struct latch latch OVS_GUARDED;  /* Wakeup latch for this thread. */
     bool waiting OVS_GUARDED;        /* True if latch_wait() already called. */
 };

@@ -35,7 +35,7 @@
 
 #include "flow.h"
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "match.h"
 #include "openflow/nicira-ext.h"
 #include "openflow/openflow.h"
@@ -53,14 +53,14 @@ extern struct ovs_mutex ofproto_mutex;
 struct classifier {
     int n_rules;                /* Total number of rules. */
     struct hmap tables;         /* Contains "struct cls_table"s.  */
-    struct list tables_priority; /* Tables in descending priority order */
+    struct clist tables_priority; /* Tables in descending priority order */
     struct ovs_rwlock rwlock OVS_ACQ_AFTER(ofproto_mutex);
 };
 
 /* A set of rules that all have the same fields wildcarded. */
 struct cls_table {
     struct hmap_node hmap_node; /* Within struct classifier 'tables' hmap. */
-    struct list list_node;      /* Within classifier 'tables_priority_list' */
+    struct clist list_node;      /* Within classifier 'tables_priority_list' */
     struct hmap rules;          /* Contains "struct cls_rule"s. */
     struct minimask mask;       /* Wildcards for fields. */
     int n_table_rules;          /* Number of rules, including duplicates. */
@@ -79,7 +79,7 @@ cls_table_is_catchall(const struct cls_table *table)
 /* A rule in a "struct classifier". */
 struct cls_rule {
     struct hmap_node hmap_node; /* Within struct cls_table 'rules'. */
-    struct list list;           /* List of identical, lower-priority rules. */
+    struct clist list;           /* List of identical, lower-priority rules. */
     struct minimatch match;     /* Matching rule. */
     unsigned int priority;      /* Larger numbers are higher priorities. */
 };

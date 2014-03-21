@@ -36,7 +36,7 @@ COVERAGE_DEFINE(rtbsd_changed);
 static int notify_sock = -1;
 
 /* All registered notifiers. */
-static struct list all_notifiers = LIST_INITIALIZER(&all_notifiers);
+static struct clist all_notifiers = LIST_INITIALIZER(&all_notifiers);
 
 static void rtbsd_report_change(const struct if_msghdr *);
 static void rtbsd_report_notify_error(void);

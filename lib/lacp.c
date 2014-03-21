@@ -90,7 +90,7 @@ enum slave_status {
 };
 
 struct lacp {
-    struct list node;             /* Node in all_lacps list. */
+    struct clist node;             /* Node in all_lacps list. */
     char *name;                   /* Name of this lacp object. */
     uint8_t sys_id[ETH_ADDR_LEN]; /* System ID. */
     uint16_t sys_priority;        /* System Priority. */
@@ -125,8 +125,8 @@ struct slave {
 };
 
 static struct ovs_mutex mutex;
-static struct list all_lacps__ = LIST_INITIALIZER(&all_lacps__);
-static struct list *const all_lacps OVS_GUARDED_BY(mutex) = &all_lacps__;
+static struct clist all_lacps__ = LIST_INITIALIZER(&all_lacps__);
+static struct clist *const all_lacps OVS_GUARDED_BY(mutex) = &all_lacps__;
 
 static void lacp_update_attached(struct lacp *) OVS_REQUIRES(mutex);
 
@@ -213,7 +213,7 @@ lacp_create(void) OVS_EXCLUDED(mutex)
 
     lacp = xzalloc(sizeof *lacp);
     hmap_init(&lacp->slaves);
-    atomic_init(&lacp->ref_cnt, 1);
+    of_atomic_init(&lacp->ref_cnt, 1);
 
     ovs_mutex_lock(&mutex);
     list_push_back(all_lacps, &lacp->node);
@@ -227,7 +227,7 @@ lacp_ref(const struct lacp *lacp_)
     struct lacp *lacp = CONST_CAST(struct lacp *, lacp_);
     if (lacp) {
         int orig;
-        atomic_add(&lacp->ref_cnt, 1, &orig);
+        of_atomic_add(&lacp->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return lacp;
@@ -243,7 +243,7 @@ lacp_unref(struct lacp *lacp) OVS_EXCLUDED(mutex)
         return;
     }
 
-    atomic_sub(&lacp->ref_cnt, 1, &orig);
+    of_atomic_sub(&lacp->ref_cnt, 1, &orig);
     ovs_assert(orig > 0);
     if (orig == 1) {
         struct slave *slave, *next;

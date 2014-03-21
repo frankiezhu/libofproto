@@ -31,7 +31,7 @@
 #include "in-band.h"
 #include "lacp.h"
 #include "learn.h"
-#include "list.h"
+#include "clist.h"
 #include "mac-learning.h"
 #include "meta-flow.h"
 #include "multipath.h"
@@ -62,7 +62,7 @@ struct xbridge {
     struct hmap_node hmap_node;   /* Node in global 'xbridges' map. */
     struct ofproto_dpif *ofproto; /* Key in global 'xbridges' map. */
 
-    struct list xbundles;         /* Owned xbundles. */
+    struct clist xbundles;         /* Owned xbundles. */
     struct hmap xports;           /* Indexed by ofp_port. */
 
     char *name;                   /* Name used in log messages. */
@@ -87,10 +87,10 @@ struct xbundle {
     struct hmap_node hmap_node;    /* In global 'xbundles' map. */
     struct ofbundle *ofbundle;     /* Key in global 'xbundles' map. */
 
-    struct list list_node;         /* In parent 'xbridges' list. */
+    struct clist list_node;         /* In parent 'xbridges' list. */
     struct xbridge *xbridge;       /* Parent xbridge. */
 
-    struct list xports;            /* Contains "struct xport"s. */
+    struct clist xports;            /* Contains "struct xport"s. */
 
     char *name;                    /* Name used in log messages. */
     struct bond *bond;             /* Nonnull iff more than one port. */
@@ -113,7 +113,7 @@ struct xport {
 
     odp_port_t odp_port;             /* Datapath port number or ODPP_NONE. */
 
-    struct list bundle_node;         /* In parent xbundle (if it exists). */
+    struct clist bundle_node;         /* In parent xbundle (if it exists). */
     struct xbundle *xbundle;         /* Parent xbundle or null. */
 
     struct netdev *netdev;           /* 'ofport''s netdev. */

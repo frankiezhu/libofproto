@@ -19,7 +19,7 @@
 
 #include "classifier.h"
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "match.h"
 #include "ofp-errors.h"
 #include "ofproto.h"
@@ -120,7 +120,7 @@ void ofconn_set_async_config(struct ofconn *,
                              const uint32_t slave_masks[OAM_N_TYPES]);
 
 void ofconn_send_reply(const struct ofconn *, struct ofpbuf *);
-void ofconn_send_replies(const struct ofconn *, struct list *);
+void ofconn_send_replies(const struct ofconn *, struct clist *);
 void ofconn_send_error(const struct ofconn *, const struct ofp_header *request,
                        enum ofperr);
 
@@ -128,8 +128,8 @@ enum ofperr ofconn_pktbuf_retrieve(struct ofconn *, uint32_t id,
                                    struct ofpbuf **bufferp, ofp_port_t *in_port);
 
 bool ofconn_has_pending_opgroups(const struct ofconn *);
-void ofconn_add_opgroup(struct ofconn *, struct list *);
-void ofconn_remove_opgroup(struct ofconn *, struct list *,
+void ofconn_add_opgroup(struct ofconn *, struct clist *);
+void ofconn_remove_opgroup(struct ofconn *, struct clist *,
                            const struct ofp_header *request, int error);
 
 /* Sending asynchronous messages. */
@@ -197,7 +197,7 @@ void ofmonitor_collect_resume_rules(struct ofmonitor *, uint64_t seqno,
                                     struct rule_collection *)
     OVS_REQUIRES(ofproto_mutex);
 void ofmonitor_compose_refresh_updates(struct rule_collection *rules,
-                                       struct list *msgs)
+                                       struct clist *msgs)
     OVS_REQUIRES(ofproto_mutex);
 
 #endif /* connmgr.h */

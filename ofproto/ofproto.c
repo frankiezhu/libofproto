@@ -88,8 +88,8 @@ enum ofoperation_type {
  * assigned to groups but will not have an associated ofconn. */
 struct ofopgroup {
     struct ofproto *ofproto;    /* Owning ofproto. */
-    struct list ofproto_node;   /* In ofproto's "pending" list. */
-    struct list ops;            /* List of "struct ofoperation"s. */
+    struct clist ofproto_node;   /* In ofproto's "pending" list. */
+    struct clist ops;            /* List of "struct ofoperation"s. */
     int n_running;              /* Number of ops still pending. */
 
     /* Data needed to send OpenFlow reply on failure or to send a buffered
@@ -101,7 +101,7 @@ struct ofopgroup {
      * refers to freed memory, so the 'ofconn' member must be used only if
      * !list_is_empty(ofconn_node).
      */
-    struct list ofconn_node;    /* In ofconn's list of pending opgroups. */
+    struct clist ofconn_node;    /* In ofconn's list of pending opgroups. */
     struct ofconn *ofconn;      /* ofconn for reply (but see note above). */
     struct ofp_header *request; /* Original request (truncated at 64 bytes). */
     uint32_t buffer_id;         /* Buffer id from original request. */
@@ -117,7 +117,7 @@ static void ofopgroup_complete(struct ofopgroup *);
 /* A single flow table operation. */
 struct ofoperation {
     struct ofopgroup *group;    /* Owning group. */
-    struct list group_node;     /* In ofopgroup's "ops" list. */
+    struct clist group_node;     /* In ofopgroup's "ops" list. */
     struct hmap_node hmap_node; /* In ofproto's "deletions" hmap. */
     struct rule *rule;          /* Rule being operated upon. */
     enum ofoperation_type type; /* Type of operation. */
@@ -221,7 +221,7 @@ static void rule_criteria_destroy(struct rule_criteria *);
  * (We can't do this immediately from ofopgroup_complete() because that holds
  * ofproto_mutex, which rule_execute() needs released.) */
 struct rule_execute {
-    struct list list_node;      /* In struct ofproto's "rule_executes" list. */
+    struct clist list_node;      /* In struct ofproto's "rule_executes" list. */
     struct rule *rule;          /* Owns a reference to the rule. */
     ofp_port_t in_port;
     struct ofpbuf *packet;      /* Owns the packet. */
@@ -2435,7 +2435,7 @@ ofproto_rule_ref(struct rule *rule)
     if (rule) {
         unsigned int orig;
 
-        atomic_add(&rule->ref_count, 1, &orig);
+        of_atomic_add(&rule->ref_count, 1, &orig);
         ovs_assert(orig != 0);
     }
 }
@@ -2446,7 +2446,7 @@ ofproto_rule_unref(struct rule *rule)
     if (rule) {
         unsigned int orig;
 
-        atomic_sub(&rule->ref_count, 1, &orig);
+        of_atomic_sub(&rule->ref_count, 1, &orig);
         if (orig == 1) {
             rule->ofproto->ofproto_class->rule_destruct(rule);
             ofproto_rule_destroy__(rule);
@@ -2495,7 +2495,7 @@ rule_actions_create(const struct ofpact *ofpacts, size_t ofpacts_len)
     struct rule_actions *actions;
 
     actions = xmalloc(sizeof *actions);
-    atomic_init(&actions->ref_count, 1);
+    of_atomic_init(&actions->ref_count, 1);
     actions->ofpacts = xmemdup(ofpacts, ofpacts_len);
     actions->ofpacts_len = ofpacts_len;
     actions->meter_id = ofpacts_get_meter(ofpacts, ofpacts_len);
@@ -2509,7 +2509,7 @@ rule_actions_ref(struct rule_actions *actions)
     if (actions) {
         unsigned int orig;
 
-        atomic_add(&actions->ref_count, 1, &orig);
+        of_atomic_add(&actions->ref_count, 1, &orig);
         ovs_assert(orig != 0);
     }
 }
@@ -2522,7 +2522,7 @@ rule_actions_unref(struct rule_actions *actions)
     if (actions) {
         unsigned int orig;
 
-        atomic_sub(&actions->ref_count, 1, &orig);
+        of_atomic_sub(&actions->ref_count, 1, &orig);
         if (orig == 1) {
             free(actions->ofpacts);
             free(actions);
@@ -2582,7 +2582,7 @@ run_rule_executes(struct ofproto *ofproto)
     OVS_EXCLUDED(ofproto_mutex)
 {
     struct rule_execute *e, *next;
-    struct list executes;
+    struct clist executes;
 
     guarded_list_pop_all(&ofproto->rule_executes, &executes);
     LIST_FOR_EACH_SAFE (e, next, list_node, &executes) {
@@ -2603,7 +2603,7 @@ static void
 destroy_rule_executes(struct ofproto *ofproto)
 {
     struct rule_execute *e, *next;
-    struct list executes;
+    struct clist executes;
 
     guarded_list_pop_all(&ofproto->rule_executes, &executes);
     LIST_FOR_EACH_SAFE (e, next, list_node, &executes) {
@@ -2998,7 +2998,7 @@ handle_table_stats_request(struct ofconn *ofconn,
 }
 
 static void
-append_port_stat(struct ofport *port, struct list *replies)
+append_port_stat(struct ofport *port, struct clist *replies)
 {
     struct ofputil_port_stats ops = { .port_no = port->pp.port_no };
 
@@ -3019,7 +3019,7 @@ handle_port_stats_request(struct ofconn *ofconn,
 {
     struct ofproto *p = ofconn_get_ofproto(ofconn);
     struct ofport *port;
-    struct list replies;
+    struct clist replies;
     ofp_port_t port_no;
     enum ofperr error;
 
@@ -3051,7 +3051,7 @@ handle_port_desc_stats_request(struct ofconn *ofconn,
     struct ofproto *p = ofconn_get_ofproto(ofconn);
     enum ofp_version version;
     struct ofport *port;
-    struct list replies;
+    struct clist replies;
 
     ofpmp_init(&replies, request);
 
@@ -3427,7 +3427,7 @@ handle_flow_stats_request(struct ofconn *ofconn,
     struct ofputil_flow_stats_request fsr;
     struct rule_criteria criteria;
     struct rule_collection rules;
-    struct list replies;
+    struct clist replies;
     enum ofperr error;
     size_t i;
 
@@ -3656,7 +3656,7 @@ handle_aggregate_stats_request(struct ofconn *ofconn,
 
 struct queue_stats_cbdata {
     struct ofport *ofport;
-    struct list replies;
+    struct clist replies;
     long long int now;
 };
 
@@ -3929,7 +3929,7 @@ add_flow(struct ofproto *ofproto, struct ofconn *ofconn,
     /* Initialize base state. */
     *CONST_CAST(struct ofproto **, &rule->ofproto) = ofproto;
     cls_rule_move(CONST_CAST(struct cls_rule *, &rule->cr), &cr);
-    atomic_init(&rule->ref_count, 1);
+    of_atomic_init(&rule->ref_count, 1);
     rule->pending = NULL;
     rule->flow_cookie = fm->new_cookie;
     rule->created = rule->modified = rule->used = time_msec();
@@ -4700,7 +4700,7 @@ handle_barrier_request(struct ofconn *ofconn, const struct ofp_header *oh)
 static void
 ofproto_compose_flow_refresh_update(const struct rule *rule,
                                     enum nx_flow_monitor_flags flags,
-                                    struct list *msgs)
+                                    struct clist *msgs)
     OVS_REQUIRES(ofproto_mutex)
 {
     struct ofoperation *op = rule->pending;
@@ -4762,7 +4762,7 @@ ofproto_compose_flow_refresh_update(const struct rule *rule,
 
 void
 ofmonitor_compose_refresh_updates(struct rule_collection *rules,
-                                  struct list *msgs)
+                                  struct clist *msgs)
     OVS_REQUIRES(ofproto_mutex)
 {
     size_t i;
@@ -4880,7 +4880,7 @@ handle_flow_monitor_request(struct ofconn *ofconn, const struct ofp_header *oh)
     struct ofmonitor **monitors;
     size_t n_monitors, allocated_monitors;
     struct rule_collection rules;
-    struct list replies;
+    struct clist replies;
     enum ofperr error;
     struct ofpbuf b;
     size_t i;
@@ -4983,7 +4983,7 @@ handle_flow_monitor_cancel(struct ofconn *ofconn, const struct ofp_header *oh)
  */
 struct meter {
     long long int created;      /* Time created. */
-    struct list rules;          /* List of "struct rule_dpif"s. */
+    struct clist rules;          /* List of "struct rule_dpif"s. */
     ofproto_meter_id provider_meter_id;
     uint16_t flags;             /* Meter flags. */
     uint16_t n_bands;           /* Number of meter bands. */
@@ -5233,7 +5233,7 @@ handle_meter_request(struct ofconn *ofconn, const struct ofp_header *request,
                      enum ofptype type)
 {
     struct ofproto *ofproto = ofconn_get_ofproto(ofconn);
-    struct list replies;
+    struct clist replies;
     uint64_t bands_stub[256 / 8];
     struct ofpbuf bands;
     uint32_t meter_id, first, last;

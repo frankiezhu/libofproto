@@ -17,7 +17,7 @@
 #ifndef RTBSD_H
 #define RTBSD_H 1
 
-#include "list.h"
+#include "clist.h"
 
 /*
  * A digested version of a message received from a PF_ROUTE socket which
@@ -44,7 +44,7 @@ struct rtbsd_change {
 typedef void rtbsd_notify_func(const struct rtbsd_change *, void *aux);
 
 struct rtbsd_notifier {
-    struct list node;
+    struct clist node;
     rtbsd_notify_func *cb;
     void *aux;
 };

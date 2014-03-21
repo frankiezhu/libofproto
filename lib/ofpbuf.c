@@ -563,7 +563,7 @@ ofpbuf_to_string(const struct ofpbuf *b, size_t maxbytes)
 /* Removes each of the "struct ofpbuf"s on 'list' from the list and frees
  * them.  */
 void
-ofpbuf_list_delete(struct list *list)
+ofpbuf_list_delete(struct clist *list)
 {
     struct ofpbuf *b, *next;
 

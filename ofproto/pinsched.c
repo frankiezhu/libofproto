@@ -37,7 +37,7 @@
 struct pinqueue {
     struct hmap_node node;      /* In struct pinsched's 'queues' hmap. */
     ofp_port_t port_no;           /* Port number. */
-    struct list packets;        /* Contains "struct ofpbuf"s. */
+    struct clist packets;        /* Contains "struct ofpbuf"s. */
     int n;                      /* Number of packets in 'packets'. */
 };
 

@@ -26,7 +26,7 @@
 #include "guarded-list.h"
 #include "latch.h"
 #include "seq.h"
-#include "list.h"
+#include "clist.h"
 #include "netlink.h"
 #include "ofpbuf.h"
 #include "ofproto-dpif.h"
@@ -54,7 +54,7 @@ struct handler {
     struct ovs_mutex mutex;            /* Mutex guarding the following. */
 
     /* Atomic queue of unprocessed miss upcalls. */
-    struct list upcalls OVS_GUARDED;
+    struct clist upcalls OVS_GUARDED;
     size_t n_upcalls OVS_GUARDED;
 
     size_t n_new_upcalls;              /* Only changed by the dispatcher. */
@@ -97,7 +97,7 @@ struct udpif {
 static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(1, 5);
 
 static void recv_upcalls(struct udpif *);
-static void handle_miss_upcalls(struct udpif *, struct list *upcalls);
+static void handle_miss_upcalls(struct udpif *, struct clist *upcalls);
 static void miss_destroy(struct flow_miss *);
 static void *udpif_dispatcher(void *);
 static void *udpif_miss_handler(void *);
@@ -115,7 +115,7 @@ udpif_create(struct dpif_backer *backer, struct dpif *dpif)
     guarded_list_init(&udpif->drop_keys);
     guarded_list_init(&udpif->upcalls);
     guarded_list_init(&udpif->fmbs);
-    atomic_init(&udpif->reval_seq, 0);
+    of_atomic_init(&udpif->reval_seq, 0);
 
     return udpif;
 }
@@ -236,14 +236,14 @@ udpif_revalidate(struct udpif *udpif)
 {
     struct flow_miss_batch *fmb, *next_fmb;
     unsigned int junk;
-    struct list fmbs;
+    struct clist fmbs;
 
     /* Since we remove each miss on revalidation, their statistics won't be
      * accounted to the appropriate 'facet's in the upper layer.  In most
      * cases, this is alright because we've already pushed the stats to the
      * relevant rules.  However, NetFlow requires absolute packet counts on
      * 'facet's which could now be incorrect. */
-    atomic_add(&udpif->reval_seq, 1, &junk);
+    of_atomic_add(&udpif->reval_seq, 1, &junk);
 
     guarded_list_pop_all(&udpif->fmbs, &fmbs);
     LIST_FOR_EACH_SAFE (fmb, next_fmb, list_node, &fmbs) {
@@ -260,7 +260,7 @@ udpif_revalidate(struct udpif *udpif)
 struct upcall *
 upcall_next(struct udpif *udpif)
 {
-    struct list *next = guarded_list_pop_front(&udpif->upcalls);
+    struct clist *next = guarded_list_pop_front(&udpif->upcalls);
     return next ? CONTAINER_OF(next, struct upcall, list_node) : NULL;
 }
 
@@ -285,7 +285,7 @@ flow_miss_batch_next(struct udpif *udpif)
     for (i = 0; i < 50; i++) {
         struct flow_miss_batch *next;
         unsigned int reval_seq;
-        struct list *next_node;
+        struct clist *next_node;
 
         next_node = guarded_list_pop_front(&udpif->fmbs);
         if (!next_node) {
@@ -293,7 +293,7 @@ flow_miss_batch_next(struct udpif *udpif)
         }
 
         next = CONTAINER_OF(next_node, struct flow_miss_batch, list_node);
-        atomic_read(&udpif->reval_seq, &reval_seq);
+        of_atomic_read(&udpif->reval_seq, &reval_seq);
         if (next->reval_seq == reval_seq) {
             return next;
         }
@@ -328,7 +328,7 @@ flow_miss_batch_destroy(struct flow_miss_batch *fmb)
 struct drop_key *
 drop_key_next(struct udpif *udpif)
 {
-    struct list *next = guarded_list_pop_front(&udpif->drop_keys);
+    struct clist *next = guarded_list_pop_front(&udpif->drop_keys);
     return next ? CONTAINER_OF(next, struct drop_key, list_node) : NULL;
 }
 
@@ -347,7 +347,7 @@ void
 udpif_drop_key_clear(struct udpif *udpif)
 {
     struct drop_key *drop_key, *next;
-    struct list list;
+    struct clist list;
 
     guarded_list_pop_all(&udpif->drop_keys, &list);
     LIST_FOR_EACH_SAFE (drop_key, next, list_node, &list) {
@@ -381,7 +381,7 @@ udpif_dispatcher(void *arg)
 static void *
 udpif_miss_handler(void *arg)
 {
-    struct list misses = LIST_INITIALIZER(&misses);
+    struct clist misses = LIST_INITIALIZER(&misses);
     struct handler *handler = arg;
 
     set_subprogram_name("miss_handler");
@@ -686,7 +686,7 @@ execute_flow_miss(struct flow_miss *miss, struct dpif_op *ops, size_t *n_ops)
 }
 
 static void
-handle_miss_upcalls(struct udpif *udpif, struct list *upcalls)
+handle_miss_upcalls(struct udpif *udpif, struct clist *upcalls)
 {
     struct dpif_op *opsp[FLOW_MISS_MAX_BATCH];
     struct dpif_op ops[FLOW_MISS_MAX_BATCH];
@@ -702,7 +702,7 @@ handle_miss_upcalls(struct udpif *udpif, struct list *upcalls)
      * the packets that have the same flow in the same "flow_miss" structure so
      * that we can process them together. */
     fmb = xmalloc(sizeof *fmb);
-    atomic_read(&udpif->reval_seq, &fmb->reval_seq);
+    of_atomic_read(&udpif->reval_seq, &fmb->reval_seq);
     hmap_init(&fmb->misses);
     n_upcalls = 0;
     LIST_FOR_EACH_SAFE (upcall, next, list_node, upcalls) {
@@ -791,7 +791,7 @@ handle_miss_upcalls(struct udpif *udpif, struct list *upcalls)
     }
     dpif_operate(udpif->dpif, opsp, n_ops);
 
-    atomic_read(&udpif->reval_seq, &reval_seq);
+    of_atomic_read(&udpif->reval_seq, &reval_seq);
     if (reval_seq != fmb->reval_seq) {
         COVERAGE_INC(fmb_queue_revalidated);
         flow_miss_batch_destroy(fmb);

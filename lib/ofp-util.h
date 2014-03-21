@@ -245,7 +245,7 @@ enum ofputil_flow_mod_flags {
  * The handling of cookies across multiple versions of OpenFlow is a bit
  * confusing.  See DESIGN for the details. */
 struct ofputil_flow_mod {
-    struct list list_node;    /* For queuing flow_mods. */
+    struct clist list_node;    /* For queuing flow_mods. */
 
     struct match match;
     unsigned int priority;
@@ -332,7 +332,7 @@ int ofputil_decode_flow_stats_reply(struct ofputil_flow_stats *,
                                     bool flow_age_extension,
                                     struct ofpbuf *ofpacts);
 void ofputil_append_flow_stats_reply(const struct ofputil_flow_stats *,
-                                     struct list *replies);
+                                     struct clist *replies);
 
 /* Aggregate stats reply, independent of protocol. */
 struct ofputil_aggregate_stats {
@@ -370,7 +370,7 @@ struct ofpbuf *ofputil_encode_flow_removed(const struct ofputil_flow_removed *,
 
 /* Abstract packet-in message. */
 struct ofputil_packet_in {
-    struct list list_node; /* For queueing packet_ins. */
+    struct clist list_node; /* For queueing packet_ins. */
 
     const void *packet;
     size_t packet_len;
@@ -628,10 +628,10 @@ struct ofpbuf *ofputil_encode_meter_features_reply(const struct
 void ofputil_decode_meter_request(const struct ofp_header *,
                                   uint32_t *meter_id);
 
-void ofputil_append_meter_config(struct list *replies,
+void ofputil_append_meter_config(struct clist *replies,
                                  const struct ofputil_meter_config *);
 
-void ofputil_append_meter_stats(struct list *replies,
+void ofputil_append_meter_stats(struct clist *replies,
                                 const struct ofputil_meter_stats *);
 
 enum ofputil_meter_request_type {
@@ -711,9 +711,9 @@ struct ofputil_flow_update {
 
 int ofputil_decode_flow_update(struct ofputil_flow_update *,
                                struct ofpbuf *msg, struct ofpbuf *ofpacts);
-void ofputil_start_flow_update(struct list *replies);
+void ofputil_start_flow_update(struct clist *replies);
 void ofputil_append_flow_update(const struct ofputil_flow_update *,
-                                struct list *replies);
+                                struct clist *replies);
 
 /* Abstract nx_flow_monitor_cancel. */
 uint32_t ofputil_decode_flow_monitor_cancel(const struct ofp_header *);
@@ -722,7 +722,7 @@ struct ofpbuf *ofputil_encode_flow_monitor_cancel(uint32_t id);
 /* Encoding OpenFlow stats messages. */
 void ofputil_append_port_desc_stats_reply(enum ofp_version ofp_version,
                                           const struct ofputil_phy_port *pp,
-                                          struct list *replies);
+                                          struct clist *replies);
 
 /* Encoding simple OpenFlow messages. */
 struct ofpbuf *make_echo_request(enum ofp_version);
@@ -771,7 +771,7 @@ bool ofputil_frag_handling_from_string(const char *, enum ofp_config_flags *);
  * OFPUTIL_NXAST_DEC_TTL
  * OFPUTIL_NXAST_FIN_TIMEOUT
  *
- * (The above list helps developers who want to "grep" for these definitions.)
+ * (The above clist.helps developers who want to "grep" for these definitions.)
  */
 enum OVS_PACKED_ENUM ofputil_action_code {
     OFPUTIL_ACTION_INVALID,
@@ -842,7 +842,7 @@ struct ofputil_port_stats {
 
 struct ofpbuf *ofputil_encode_dump_ports_request(enum ofp_version ofp_version,
                                                  ofp_port_t port);
-void ofputil_append_port_stat(struct list *replies,
+void ofputil_append_port_stat(struct clist *replies,
                               const struct ofputil_port_stats *ops);
 size_t ofputil_count_port_stats(const struct ofp_header *);
 int ofputil_decode_port_stats(struct ofputil_port_stats *, struct ofpbuf *msg);
@@ -877,7 +877,7 @@ struct ofputil_queue_stats {
 
 size_t ofputil_count_queue_stats(const struct ofp_header *);
 int ofputil_decode_queue_stats(struct ofputil_queue_stats *qs, struct ofpbuf *msg);
-void ofputil_append_queue_stat(struct list *replies,
+void ofputil_append_queue_stat(struct clist *replies,
                                const struct ofputil_queue_stats *oqs);
 
 #if defined __cplusplus

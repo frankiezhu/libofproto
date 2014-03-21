@@ -21,9 +21,9 @@
 
 #if OVS_ATOMIC_PTHREADS_IMPL
 bool
-atomic_flag_test_and_set(volatile atomic_flag *flag_)
+of_atomic_flag_test_and_set(volatile of_atomic_flag *flag_)
 {
-    atomic_flag *flag = CONST_CAST(atomic_flag *, flag_);
+    of_atomic_flag *flag = CONST_CAST(of_atomic_flag *, flag_);
     bool old_value;
 
     xpthread_mutex_lock(&flag->mutex);
@@ -35,16 +35,16 @@ atomic_flag_test_and_set(volatile atomic_flag *flag_)
 }
 
 bool
-atomic_flag_test_and_set_explicit(volatile atomic_flag *flag,
+of_atomic_flag_test_and_set_explicit(volatile of_atomic_flag *flag,
                                   memory_order order OVS_UNUSED)
 {
-    return atomic_flag_test_and_set(flag);
+    return of_atomic_flag_test_and_set(flag);
 }
 
 void
-atomic_flag_clear(volatile atomic_flag *flag_)
+of_atomic_flag_clear(volatile of_atomic_flag *flag_)
 {
-    atomic_flag *flag = CONST_CAST(atomic_flag *, flag_);
+    of_atomic_flag *flag = CONST_CAST(of_atomic_flag *, flag_);
 
     xpthread_mutex_lock(&flag->mutex);
     flag->b = false;
@@ -52,10 +52,10 @@ atomic_flag_clear(volatile atomic_flag *flag_)
 }
 
 void
-atomic_flag_clear_explicit(volatile atomic_flag *flag,
+of_atomic_flag_clear_explicit(volatile of_atomic_flag *flag,
                            memory_order order OVS_UNUSED)
 {
-    return atomic_flag_clear(flag);
+    return of_atomic_flag_clear(flag);
 }
 
 #endif  /* OVS_ATOMIC_PTHREADS_IMPL */

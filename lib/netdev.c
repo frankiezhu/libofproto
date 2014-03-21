@@ -29,7 +29,7 @@
 #include "dynamic-string.h"
 #include "fatal-signal.h"
 #include "hash.h"
-#include "list.h"
+#include "clist.h"
 #include "netdev-provider.h"
 #include "netdev-vport.h"
 #include "ofpbuf.h"
@@ -51,7 +51,7 @@ COVERAGE_DEFINE(netdev_get_stats);
 
 struct netdev_saved_flags {
     struct netdev *netdev;
-    struct list node;           /* In struct netdev's saved_flags_list. */
+    struct clist node;           /* In struct netdev's saved_flags_list. */
     enum netdev_flags saved_flags;
     enum netdev_flags saved_values;
 };
@@ -189,7 +189,7 @@ netdev_register_provider(const struct netdev_class *new_class)
             hmap_insert(&netdev_classes, &rc->hmap_node,
                         hash_string(new_class->type, 0));
             rc->class = new_class;
-            atomic_init(&rc->ref_cnt, 0);
+            of_atomic_init(&rc->ref_cnt, 0);
         } else {
             VLOG_ERR("failed to initialize %s network device class: %s",
                      new_class->type, ovs_strerror(error));
@@ -219,7 +219,7 @@ netdev_unregister_provider(const char *type)
     } else {
         int ref_cnt;
 
-        atomic_read(&rc->ref_cnt, &ref_cnt);
+        of_atomic_read(&rc->ref_cnt, &ref_cnt);
         if (!ref_cnt) {
             hmap_remove(&netdev_classes, &rc->hmap_node);
             free(rc);
@@ -330,7 +330,7 @@ netdev_open(const char *name, const char *type, struct netdev **netdevp)
                 if (!error) {
                     int old_ref_cnt;
 
-                    atomic_add(&rc->ref_cnt, 1, &old_ref_cnt);
+                    of_atomic_add(&rc->ref_cnt, 1, &old_ref_cnt);
                 } else {
                     free(netdev->name);
                     ovs_assert(list_is_empty(&netdev->saved_flags_list));
@@ -452,7 +452,7 @@ netdev_unref(struct netdev *dev)
 
         ovs_rwlock_rdlock(&netdev_class_rwlock);
         rc = netdev_lookup_class(class->type);
-        atomic_sub(&rc->ref_cnt, 1, &old_ref_cnt);
+        of_atomic_sub(&rc->ref_cnt, 1, &old_ref_cnt);
         ovs_assert(old_ref_cnt > 0);
         ovs_rwlock_unlock(&netdev_class_rwlock);
     } else {

@@ -14,39 +14,39 @@
  * limitations under the License.
  */
 
-/* This header implements atomic_flag on Clang and on GCC 4.7 and later. */
+/* This header implements of_atomic_flag on Clang and on GCC 4.7 and later. */
 #ifndef IN_OVS_ATOMIC_H
 #error "This header should only be included indirectly via ovs-atomic.h."
 #endif
 
-/* atomic_flag */
+/* of_atomic_flag */
 
 typedef struct {
     unsigned char b;
-} atomic_flag;
-#define ATOMIC_FLAG_INIT { .b = false }
+} of_atomic_flag;
+#define OF_ATOMIC_FLAG_INIT { .b = false }
 
 static inline bool
-atomic_flag_test_and_set_explicit(volatile atomic_flag *object,
+of_atomic_flag_test_and_set_explicit(volatile of_atomic_flag *object,
                                   memory_order order)
 {
     return __atomic_test_and_set(&object->b, order);
 }
 
 static inline bool
-atomic_flag_test_and_set(volatile atomic_flag *object)
+of_atomic_flag_test_and_set(volatile of_atomic_flag *object)
 {
-    return atomic_flag_test_and_set_explicit(object, memory_order_seq_cst);
+    return of_atomic_flag_test_and_set_explicit(object, memory_order_seq_cst);
 }
 
 static inline void
-atomic_flag_clear_explicit(volatile atomic_flag *object, memory_order order)
+of_atomic_flag_clear_explicit(volatile of_atomic_flag *object, memory_order order)
 {
     __atomic_clear(object, order);
 }
 
 static inline void
-atomic_flag_clear(volatile atomic_flag *object)
+of_atomic_flag_clear(volatile of_atomic_flag *object)
 {
-    atomic_flag_clear_explicit(object, memory_order_seq_cst);
+    of_atomic_flag_clear_explicit(object, memory_order_seq_cst);
 }

@@ -110,10 +110,10 @@ static enum ofperr ofpraw_from_ofphdrs(enum ofpraw *, const struct ofphdrs *);
 static ovs_be32
 alloc_xid(void)
 {
-    static atomic_uint32_t next_xid = ATOMIC_VAR_INIT(1);
+    static atomic_uint32_t next_xid = OF_ATOMIC_VAR_INIT(1);
     uint32_t xid;
 
-    atomic_add(&next_xid, 1, &xid);
+    of_atomic_add(&next_xid, 1, &xid);
     return htonl(xid);
 }
 
@@ -853,7 +853,7 @@ static ovs_be16 *ofpmp_flags__(const struct ofp_header *);
  * use calls to the other ofpmp_*() functions to add to the body and split the
  * message into multiple parts, if necessary. */
 void
-ofpmp_init(struct list *replies, const struct ofp_header *request)
+ofpmp_init(struct clist *replies, const struct ofp_header *request)
 {
     struct ofpbuf *msg;
 
@@ -871,7 +871,7 @@ ofpmp_init(struct list *replies, const struct ofp_header *request)
  * have not actually been allocated, so the caller must do so with
  * e.g. ofpbuf_put_uninit(). */
 struct ofpbuf *
-ofpmp_reserve(struct list *replies, size_t len)
+ofpmp_reserve(struct clist *replies, size_t len)
 {
     struct ofpbuf *msg = ofpbuf_from_list(list_back(replies));
 
@@ -901,7 +901,7 @@ ofpmp_reserve(struct list *replies, size_t len)
 /* Appends 'len' bytes to the series of statistics replies in 'replies', and
  * returns the first byte. */
 void *
-ofpmp_append(struct list *replies, size_t len)
+ofpmp_append(struct clist *replies, size_t len)
 {
     return ofpbuf_put_uninit(ofpmp_reserve(replies, len), len);
 }
@@ -917,7 +917,7 @@ ofpmp_append(struct list *replies, size_t len)
  * the first 'start_ofs' bytes, the second one containing the bytes from that
  * offset onward. */
 void
-ofpmp_postappend(struct list *replies, size_t start_ofs)
+ofpmp_postappend(struct clist *replies, size_t start_ofs)
 {
     struct ofpbuf *msg = ofpbuf_from_list(list_back(replies));
 

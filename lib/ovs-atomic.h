@@ -88,15 +88,15 @@
  * ==============
  *
  * To initialize an atomic variable at its point of definition, use
- * ATOMIC_VAR_INIT:
+ * OF_ATOMIC_VAR_INIT:
  *
- *     static atomic_int ai = ATOMIC_VAR_INIT(123);
+ *     static atomic_int ai = OF_ATOMIC_VAR_INIT(123);
  *
- * To initialize an atomic variable in code, use atomic_init():
+ * To initialize an atomic variable in code, use of_atomic_init():
  *
  *     static atomic_int ai;
  * ...
- *     atomic_init(&ai, 123);
+ *     of_atomic_init(&ai, 123);
  *
  *
  * Barriers
@@ -161,33 +161,33 @@
  *
  * The "store" primitives match C11:
  *
- *     void atomic_store(A *object, C value);
- *     void atomic_store_explicit(A *object, C value, memory_order);
+ *     void of_atomic_store(A *object, C value);
+ *     void of_atomic_store_explicit(A *object, C value, memory_order);
  *
  *         Atomically stores 'value' into '*object', respecting the given
- *         memory order (or memory_order_seq_cst for atomic_store()).
+ *         memory order (or memory_order_seq_cst for of_atomic_store()).
  *
  * The following primitives differ from the C11 ones (and have different names)
  * because there does not appear to be a way to implement the standard
  * primitives in standard C:
  *
- *     void atomic_read(A *src, C *dst);
- *     void atomic_read_explicit(A *src, C *dst, memory_order);
+ *     void of_atomic_read(A *src, C *dst);
+ *     void of_atomic_read_explicit(A *src, C *dst, memory_order);
  *
  *         Atomically loads a value from 'src', writing the value read into
  *         '*dst', respecting the given memory order (or memory_order_seq_cst
- *         for atomic_read()).
+ *         for of_atomic_read()).
  *
- *     void atomic_add(A *rmw, C arg, C *orig);
- *     void atomic_sub(A *rmw, C arg, C *orig);
- *     void atomic_or(A *rmw, C arg, C *orig);
- *     void atomic_xor(A *rmw, C arg, C *orig);
- *     void atomic_and(A *rmw, C arg, C *orig);
- *     void atomic_add_explicit(A *rmw, C arg, C *orig, memory_order);
- *     void atomic_sub_explicit(A *rmw, C arg, C *orig, memory_order);
- *     void atomic_or_explicit(A *rmw, C arg, C *orig, memory_order);
- *     void atomic_xor_explicit(A *rmw, C arg, C *orig, memory_order);
- *     void atomic_and_explicit(A *rmw, C arg, C *orig, memory_order);
+ *     void of_atomic_add(A *rmw, C arg, C *orig);
+ *     void of_atomic_sub(A *rmw, C arg, C *orig);
+ *     void of_atomic_or(A *rmw, C arg, C *orig);
+ *     void of_atomic_xor(A *rmw, C arg, C *orig);
+ *     void of_atomic_and(A *rmw, C arg, C *orig);
+ *     void of_atomic_add_explicit(A *rmw, C arg, C *orig, memory_order);
+ *     void of_atomic_sub_explicit(A *rmw, C arg, C *orig, memory_order);
+ *     void of_atomic_or_explicit(A *rmw, C arg, C *orig, memory_order);
+ *     void of_atomic_xor_explicit(A *rmw, C arg, C *orig, memory_order);
+ *     void of_atomic_and_explicit(A *rmw, C arg, C *orig, memory_order);
  *
  *         Atomically applies the given operation, with 'arg' as the second
  *         operand, to '*rmw', and stores the original value of '*rmw' into
@@ -198,30 +198,30 @@
  *         |=, ^=, or |= on non-atomic types.
  *
  *
- * atomic_flag
+ * of_atomic_flag
  * ===========
  *
- * atomic_flag is a typedef for a type with two states, set and clear, that
+ * of_atomic_flag is a typedef for a type with two states, set and clear, that
  * provides atomic test-and-set functionality.
  *
- * ATOMIC_FLAG_INIT is an initializer for atomic_flag.  The initial state is
+ * OF_ATOMIC_FLAG_INIT is an initializer for of_atomic_flag.  The initial state is
  * "clear".
  *
  * The following functions are available.
  *
- *     bool atomic_flag_test_and_set(atomic_flag *object)
- *     bool atomic_flag_test_and_set_explicit(atomic_flag *object,
+ *     bool of_atomic_flag_test_and_set(of_atomic_flag *object)
+ *     bool of_atomic_flag_test_and_set_explicit(of_atomic_flag *object,
  *                                            memory_order);
  *
  *         Atomically sets '*object', respsecting the given memory order (or
- *         memory_order_seq_cst for atomic_flag_test_and_set()).  Returns the
+ *         memory_order_seq_cst for of_atomic_flag_test_and_set()).  Returns the
  *         previous value of the flag (false for clear, true for set).
  *
- *     void atomic_flag_clear(atomic_flag *object);
- *     void atomic_flag_clear_explicit(atomic_flag *object, memory_order);
+ *     void of_atomic_flag_clear(of_atomic_flag *object);
+ *     void of_atomic_flag_clear_explicit(of_atomic_flag *object, memory_order);
  *
  *         Atomically clears '*object', respecting the given memory order (or
- *         memory_order_seq_cst for atomic_flag_clear()).
+ *         memory_order_seq_cst for of_atomic_flag_clear()).
  */
 
 #include <limits.h>

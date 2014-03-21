@@ -171,7 +171,7 @@ static const uint8_t *
 cfm_ccm_addr(struct cfm *cfm)
 {
     bool extended;
-    atomic_read(&cfm->extended, &extended);
+    of_atomic_read(&cfm->extended, &extended);
     return extended ? eth_addr_ccm_x : eth_addr_ccm;
 }
 
@@ -330,9 +330,9 @@ cfm_create(const struct netdev *netdev) OVS_EXCLUDED(mutex)
     cfm->fault_override = -1;
     cfm->health = -1;
     cfm->last_tx = 0;
-    atomic_init(&cfm->extended, false);
-    atomic_init(&cfm->check_tnl_key, false);
-    atomic_init(&cfm->ref_cnt, 1);
+    of_atomic_init(&cfm->extended, false);
+    of_atomic_init(&cfm->check_tnl_key, false);
+    of_atomic_init(&cfm->ref_cnt, 1);
 
     ovs_mutex_lock(&mutex);
     cfm_generate_maid(cfm);
@@ -351,7 +351,7 @@ cfm_unref(struct cfm *cfm) OVS_EXCLUDED(mutex)
         return;
     }
 
-    atomic_sub(&cfm->ref_cnt, 1, &orig);
+    of_atomic_sub(&cfm->ref_cnt, 1, &orig);
     ovs_assert(orig > 0);
     if (orig != 1) {
         return;
@@ -378,7 +378,7 @@ cfm_ref(const struct cfm *cfm_)
     struct cfm *cfm = CONST_CAST(struct cfm *, cfm_);
     if (cfm) {
         int orig;
-        atomic_add(&cfm->ref_cnt, 1, &orig);
+        of_atomic_add(&cfm->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return cfm;
@@ -543,7 +543,7 @@ cfm_compose_ccm(struct cfm *cfm, struct ofpbuf *packet,
     memset(ccm->zero, 0, sizeof ccm->zero);
     ccm->end_tlv = 0;
 
-    atomic_read(&cfm->extended, &extended);
+    of_atomic_read(&cfm->extended, &extended);
     if (extended) {
         ccm->mpid = htons(hash_mpid(cfm->mpid));
         ccm->mpid64 = htonll(cfm->mpid);
@@ -604,8 +604,8 @@ cfm_configure(struct cfm *cfm, const struct cfm_settings *s)
     interval = ms_to_ccm_interval(s->interval);
     interval_ms = ccm_interval_to_ms(interval);
 
-    atomic_store(&cfm->check_tnl_key, s->check_tnl_key);
-    atomic_store(&cfm->extended, s->extended);
+    of_atomic_store(&cfm->check_tnl_key, s->check_tnl_key);
+    of_atomic_store(&cfm->extended, s->extended);
 
     cfm->ccm_vlan = s->ccm_vlan;
     cfm->ccm_pcp = s->ccm_pcp & (VLAN_PCP_MASK >> VLAN_PCP_SHIFT);
@@ -657,7 +657,7 @@ cfm_should_process_flow(const struct cfm *cfm_, const struct flow *flow,
     struct cfm *cfm = CONST_CAST(struct cfm *, cfm_);
     bool check_tnl_key;
 
-    atomic_read(&cfm->check_tnl_key, &check_tnl_key);
+    of_atomic_read(&cfm->check_tnl_key, &check_tnl_key);
     memset(&wc->masks.dl_dst, 0xff, sizeof wc->masks.dl_dst);
     if (check_tnl_key) {
         memset(&wc->masks.tunnel.tun_id, 0xff, sizeof wc->masks.tunnel.tun_id);
@@ -719,7 +719,7 @@ cfm_process_heartbeat(struct cfm *cfm, const struct ofpbuf *p)
         bool extended;
         enum cfm_fault_reason cfm_fault = 0;
 
-        atomic_read(&cfm->extended, &extended);
+        of_atomic_read(&cfm->extended, &extended);
         if (extended) {
             ccm_mpid = ntohll(ccm->mpid64);
             ccm_opdown = ccm->opdown;
@@ -848,7 +848,7 @@ cfm_get_opup(const struct cfm *cfm_) OVS_EXCLUDED(mutex)
     int opup;
 
     ovs_mutex_lock(&mutex);
-    atomic_read(&cfm->extended, &extended);
+    of_atomic_read(&cfm->extended, &extended);
     opup = extended ? cfm->remote_opup : -1;
     ovs_mutex_unlock(&mutex);
 
@@ -888,7 +888,7 @@ cfm_print_details(struct ds *ds, struct cfm *cfm) OVS_REQUIRES(mutex)
     bool extended;
     int fault;
 
-    atomic_read(&cfm->extended, &extended);
+    of_atomic_read(&cfm->extended, &extended);
 
     ds_put_format(ds, "---- %s ----\n", cfm->name);
     ds_put_format(ds, "MPID %"PRIu64":%s%s\n", cfm->mpid,

@@ -23,7 +23,7 @@
 #include "dynamic-string.h"
 #include "json.h"
 #include "jsonrpc.h"
-#include "list.h"
+#include "clist.h"
 #include "poll-loop.h"
 #include "shash.h"
 #include "stream.h"
@@ -43,7 +43,7 @@ struct unixctl_command {
 };
 
 struct unixctl_conn {
-    struct list node;
+    struct clist node;
     struct jsonrpc *rpc;
 
     /* Only one request can be in progress at a time.  While the request is
@@ -54,7 +54,7 @@ struct unixctl_conn {
 /* Server for control connection. */
 struct unixctl_server {
     struct pstream *listener;
-    struct list conns;
+    struct clist conns;
 };
 
 static struct vlog_rate_limit rl = VLOG_RATE_LIMIT_INIT(5, 5);

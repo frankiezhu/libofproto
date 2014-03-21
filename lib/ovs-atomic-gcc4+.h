@@ -148,8 +148,8 @@ int64_t locked_int64_or(struct locked_int64 *, int64_t arg);
 int64_t locked_int64_xor(struct locked_int64 *, int64_t arg);
 int64_t locked_int64_and(struct locked_int64 *, int64_t arg);
 
-#define ATOMIC_VAR_INIT(VALUE) { .value = (VALUE) }
-#define atomic_init(OBJECT, VALUE) ((OBJECT)->value = (VALUE), (void) 0)
+#define OF_ATOMIC_VAR_INIT(VALUE) { .value = (VALUE) }
+#define of_atomic_init(OBJECT, VALUE) ((OBJECT)->value = (VALUE), (void) 0)
 
 static inline void
 atomic_thread_fence(memory_order order)
@@ -181,13 +181,13 @@ atomic_signal_fence(memory_order order OVS_UNUSED)
                      IF_LOCKED_INT64(OBJECT, LOCKED_INT64_CASE, \
                                      LOCKLESS_CASE))
 
-#define atomic_is_lock_free(OBJ)                \
+#define of_atomic_is_lock_free(OBJ)                \
     ((void) (OBJ)->value,                       \
      ATOMIC_SWITCH(OBJ, true, false, false))
 
-#define atomic_store(DST, SRC) \
-    atomic_store_explicit(DST, SRC, memory_order_seq_cst)
-#define atomic_store_explicit(DST, SRC, ORDER)                          \
+#define of_atomic_store(DST, SRC) \
+    of_atomic_store_explicit(DST, SRC, memory_order_seq_cst)
+#define of_atomic_store_explicit(DST, SRC, ORDER)                          \
     (ATOMIC_SWITCH(DST,                                                 \
                    (atomic_thread_fence(ORDER),                         \
                     (DST)->value = (SRC),                               \
@@ -196,9 +196,9 @@ atomic_signal_fence(memory_order order OVS_UNUSED)
                    locked_int64_store(AS_LOCKED_INT64(DST), SRC)),      \
      (void) 0)
 
-#define atomic_read(SRC, DST) \
-    atomic_read_explicit(SRC, DST, memory_order_seq_cst)
-#define atomic_read_explicit(SRC, DST, ORDER)                           \
+#define of_atomic_read(SRC, DST) \
+    of_atomic_read_explicit(SRC, DST, memory_order_seq_cst)
+#define of_atomic_read_explicit(SRC, DST, ORDER)                           \
     (ATOMIC_SWITCH(SRC,                                                 \
                    (atomic_thread_fence_if_seq_cst(ORDER),              \
                     (*DST) = (SRC)->value,                              \
@@ -214,52 +214,52 @@ atomic_signal_fence(memory_order order OVS_UNUSED)
                    *(ORIG) = locked_int64_##OP(AS_LOCKED_INT64(RMW), ARG)), \
      (void) 0)
 
-#define atomic_add(RMW, ARG, ORIG) atomic_op__(RMW, add, ARG, ORIG)
-#define atomic_sub(RMW, ARG, ORIG) atomic_op__(RMW, sub, ARG, ORIG)
-#define atomic_or( RMW, ARG, ORIG) atomic_op__(RMW, or,  ARG, ORIG)
-#define atomic_xor(RMW, ARG, ORIG) atomic_op__(RMW, xor, ARG, ORIG)
-#define atomic_and(RMW, ARG, ORIG) atomic_op__(RMW, and, ARG, ORIG)
+#define of_atomic_add(RMW, ARG, ORIG) atomic_op__(RMW, add, ARG, ORIG)
+#define of_atomic_sub(RMW, ARG, ORIG) atomic_op__(RMW, sub, ARG, ORIG)
+#define of_atomic_or( RMW, ARG, ORIG) atomic_op__(RMW, or,  ARG, ORIG)
+#define of_atomic_xor(RMW, ARG, ORIG) atomic_op__(RMW, xor, ARG, ORIG)
+#define of_atomic_and(RMW, ARG, ORIG) atomic_op__(RMW, and, ARG, ORIG)
 
-#define atomic_add_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_add(RMW, OPERAND, ORIG))
-#define atomic_sub_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_sub(RMW, OPERAND, ORIG))
-#define atomic_or_explicit(RMW, OPERAND, ORIG, ORDER)   \
-    ((void) (ORDER), atomic_or(RMW, OPERAND, ORIG))
-#define atomic_xor_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_xor(RMW, OPERAND, ORIG))
-#define atomic_and_explicit(RMW, OPERAND, ORIG, ORDER)  \
-    ((void) (ORDER), atomic_and(RMW, OPERAND, ORIG))
+#define of_atomic_add_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_add(RMW, OPERAND, ORIG))
+#define of_atomic_sub_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_sub(RMW, OPERAND, ORIG))
+#define of_atomic_or_explicit(RMW, OPERAND, ORIG, ORDER)   \
+    ((void) (ORDER), of_atomic_or(RMW, OPERAND, ORIG))
+#define of_atomic_xor_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_xor(RMW, OPERAND, ORIG))
+#define of_atomic_and_explicit(RMW, OPERAND, ORIG, ORDER)  \
+    ((void) (ORDER), of_atomic_and(RMW, OPERAND, ORIG))
 
-/* atomic_flag */
+/* of_atomic_flag */
 
 typedef struct {
     int b;
-} atomic_flag;
-#define ATOMIC_FLAG_INIT { false }
+} of_atomic_flag;
+#define OF_ATOMIC_FLAG_INIT { false }
 
 static inline bool
-atomic_flag_test_and_set(volatile atomic_flag *object)
+of_atomic_flag_test_and_set(volatile of_atomic_flag *object)
 {
     return __sync_lock_test_and_set(&object->b, 1);
 }
 
 static inline bool
-atomic_flag_test_and_set_explicit(volatile atomic_flag *object,
+of_atomic_flag_test_and_set_explicit(volatile of_atomic_flag *object,
                                   memory_order order OVS_UNUSED)
 {
-    return atomic_flag_test_and_set(object);
+    return of_atomic_flag_test_and_set(object);
 }
 
 static inline void
-atomic_flag_clear(volatile atomic_flag *object)
+of_atomic_flag_clear(volatile of_atomic_flag *object)
 {
     __sync_lock_release(&object->b);
 }
 
 static inline void
-atomic_flag_clear_explicit(volatile atomic_flag *object,
+of_atomic_flag_clear_explicit(volatile of_atomic_flag *object,
                            memory_order order OVS_UNUSED)
 {
-    atomic_flag_clear(object);
+    of_atomic_flag_clear(object);
 }

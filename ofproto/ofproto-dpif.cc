@@ -115,7 +115,7 @@ struct ofbundle {
     char *name;                 /* Identifier for log messages. */
 
     /* Configuration. */
-    struct list ports;          /* Contains "struct ofport"s. */
+    struct clist ports;          /* Contains "struct ofport"s. */
     enum port_vlan_mode vlan_mode; /* VLAN mode */
     int vlan;                   /* -1=trunk port, else a 12-bit VLAN ID. */
     unsigned long *trunks;      /* Bitmap of trunked VLANs, if 'vlan' == -1.
@@ -171,7 +171,7 @@ enum subfacet_path {
 struct subfacet {
     /* Owners. */
     struct hmap_node hmap_node; /* In struct ofproto_dpif 'subfacets' list. */
-    struct list list_node;      /* In struct facet's 'facets' list. */
+    struct clist list_node;      /* In struct facet's 'facets' list. */
     struct facet *facet;        /* Owning facet. */
     struct dpif_backer *backer; /* Owning backer. */
 
@@ -233,7 +233,7 @@ struct facet {
     struct ofproto_dpif *ofproto;
 
     /* Owned data. */
-    struct list subfacets;
+    struct clist subfacets;
     long long int used;         /* Time last used; time created if not used. */
 
     /* Key. */
@@ -305,7 +305,7 @@ struct ofport_dpif {
 
     odp_port_t odp_port;
     struct ofbundle *bundle;    /* Bundle that contains this port, if any. */
-    struct list bundle_node;    /* In struct ofbundle's "ports" list. */
+    struct clist bundle_node;    /* In struct ofbundle's "ports" list. */
     struct cfm *cfm;            /* Connectivity Fault Management, if any. */
     struct bfd *bfd;            /* BFD, if any. */
     bool may_enable;            /* May be enabled in bonds. */
@@ -371,7 +371,7 @@ static void run_fast_rl(void);
 static int run_fast(struct ofproto *);
 
 struct dpif_completion {
-    struct list list_node;
+    struct clist list_node;
     struct ofoperation *op;
 };
 
@@ -1110,7 +1110,7 @@ close_dpif_backer(struct dpif_backer *backer)
 
 /* Datapath port slated for removal from datapath. */
 struct odp_garbage {
-    struct list list_node;
+    struct clist list_node;
     odp_port_t odp_port;
 };
 
@@ -1121,7 +1121,7 @@ open_dpif_backer(const char *type, struct dpif_backer **backerp)
     struct dpif_port_dump port_dump;
     struct dpif_port port;
     struct shash_node *node;
-    struct list garbage_list;
+    struct clist garbage_list;
     struct odp_garbage *garbage, *next;
     struct sset names;
     char *backer_name;
@@ -1392,7 +1392,7 @@ destruct(struct ofproto *ofproto_)
     struct facet *facet, *next_facet;
     struct cls_cursor cursor;
     struct oftable *table;
-    struct list pins;
+    struct clist pins;
 
     ovs_rwlock_rdlock(&ofproto->facets.rwlock);
     cls_cursor_init(&cursor, &ofproto->facets, NULL);
@@ -1458,7 +1458,7 @@ run_fast(struct ofproto *ofproto_)
     struct ofproto_dpif *ofproto = ofproto_dpif_cast(ofproto_);
     struct ofputil_packet_in *pin, *next_pin;
     struct ofport_dpif *ofport;
-    struct list pins;
+    struct clist pins;
 
     /* Do not perform any periodic activity required by 'ofproto' while
      * waiting for flow restore to complete. */
@@ -2635,7 +2635,7 @@ bundle_send_learning_packets(struct ofbundle *bundle)
     struct ofpbuf *learning_packet;
     int error, n_packets, n_errors;
     struct mac_entry *e;
-    struct list packets;
+    struct clist packets;
 
     list_init(&packets);
     ovs_rwlock_rdlock(&ofproto->ml->rwlock);

@@ -24,7 +24,7 @@
 #include "coverage.h"
 #include "dynamic-string.h"
 #include "fatal-signal.h"
-#include "list.h"
+#include "clist.h"
 #include "ovs-thread.h"
 #include "seq.h"
 #include "socket-util.h"

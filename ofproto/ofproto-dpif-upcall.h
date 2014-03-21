@@ -20,7 +20,7 @@
 #include "dpif.h"
 #include "flow.h"
 #include "hmap.h"
-#include "list.h"
+#include "clist.h"
 #include "odp-util.h"
 #include "ofpbuf.h"
 #include "ofproto-dpif-xlate.h"
@@ -58,7 +58,7 @@ enum upcall_type {
 
 /* An upcall. */
 struct upcall {
-    struct list list_node;          /* For queuing upcalls. */
+    struct clist list_node;          /* For queuing upcalls. */
 
     enum upcall_type type;          /* Classification. */
 
@@ -90,17 +90,17 @@ struct flow_miss {
     enum odp_key_fitness key_fitness;
     const struct nlattr *key;
     size_t key_len;
-    struct list packets;
+    struct clist packets;
     enum dpif_upcall_type upcall_type;
     struct dpif_flow_stats stats;
 
     struct xlate_out xout;
 
-    struct list upcalls;
+    struct clist upcalls;
 };
 
 struct flow_miss_batch {
-    struct list list_node;
+    struct clist list_node;
 
     struct flow_miss miss_buf[FLOW_MISS_MAX_BATCH];
     struct hmap misses;
@@ -119,7 +119,7 @@ void flow_miss_batch_destroy(struct flow_miss_batch *);
  * pass the drop flows up to ofproto_dpif to get it to install them. */
 struct drop_key {
     struct hmap_node hmap_node;
-    struct list list_node;
+    struct clist list_node;
     struct nlattr *key;
     size_t key_len;
 };

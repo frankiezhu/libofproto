@@ -28,7 +28,7 @@
 #include "flow.h"
 #include "hmap.h"
 #include "lacp.h"
-#include "list.h"
+#include "clist.h"
 #include "netdev.h"
 #include "odp-util.h"
 #include "ofpbuf.h"
@@ -50,7 +50,7 @@ VLOG_DEFINE_THIS_MODULE(bond);
 struct bond_entry {
     struct bond_slave *slave;   /* Assigned slave, NULL if unassigned. */
     uint64_t tx_bytes;          /* Count of bytes recently transmitted. */
-    struct list list_node;      /* In bond_slave's 'entries' list. */
+    struct clist list_node;      /* In bond_slave's 'entries' list. */
 };
 
 /* A bond slave, that is, one of the links comprising a bond. */
@@ -69,8 +69,8 @@ struct bond_slave {
     bool may_enable;            /* Client considers this slave bondable. */
 
     /* Rebalancing info.  Used only by bond_rebalance(). */
-    struct list bal_node;       /* In bond_rebalance()'s 'bals' list. */
-    struct list entries;        /* 'struct bond_entry's assigned here. */
+    struct clist bal_node;       /* In bond_rebalance()'s 'bals' list. */
+    struct clist entries;        /* 'struct bond_entry's assigned here. */
     uint64_t tx_bytes;          /* Sum across 'tx_bytes' of entries. */
 };
 
@@ -178,7 +178,7 @@ bond_create(const struct bond_settings *s)
     bond = xzalloc(sizeof *bond);
     hmap_init(&bond->slaves);
     bond->next_fake_iface_update = LLONG_MAX;
-    atomic_init(&bond->ref_cnt, 1);
+    of_atomic_init(&bond->ref_cnt, 1);
 
     bond_reconfigure(bond, s);
     return bond;
@@ -191,7 +191,7 @@ bond_ref(const struct bond *bond_)
 
     if (bond) {
         int orig;
-        atomic_add(&bond->ref_cnt, 1, &orig);
+        of_atomic_add(&bond->ref_cnt, 1, &orig);
         ovs_assert(orig > 0);
     }
     return bond;
@@ -208,7 +208,7 @@ bond_unref(struct bond *bond)
         return;
     }
 
-    atomic_sub(&bond->ref_cnt, 1, &orig);
+    of_atomic_sub(&bond->ref_cnt, 1, &orig);
     ovs_assert(orig > 0);
     if (orig != 1) {
         return;
@@ -693,13 +693,13 @@ bond_account(struct bond *bond, const struct flow *flow, uint16_t vlan,
 }
 
 static struct bond_slave *
-bond_slave_from_bal_node(struct list *bal) OVS_REQ_RDLOCK(rwlock)
+bond_slave_from_bal_node(struct clist *bal) OVS_REQ_RDLOCK(rwlock)
 {
     return CONTAINER_OF(bal, struct bond_slave, bal_node);
 }
 
 static void
-log_bals(struct bond *bond, const struct list *bals)
+log_bals(struct bond *bond, const struct clist *bals)
 {
     if (VLOG_IS_DBG_ENABLED()) {
         struct ds ds = DS_EMPTY_INITIALIZER;
@@ -805,7 +805,7 @@ choose_entry_to_migrate(const struct bond_slave *from, uint64_t to_tx_bytes)
 /* Inserts 'slave' into 'bals' so that descending order of 'tx_bytes' is
  * maintained. */
 static void
-insert_bal(struct list *bals, struct bond_slave *slave)
+insert_bal(struct clist *bals, struct bond_slave *slave)
 {
     struct bond_slave *pos;
 
@@ -820,7 +820,7 @@ insert_bal(struct list *bals, struct bond_slave *slave)
 /* Removes 'slave' from its current list and then inserts it into 'bals' so
  * that descending order of 'tx_bytes' is maintained. */
 static void
-reinsert_bal(struct list *bals, struct bond_slave *slave)
+reinsert_bal(struct clist *bals, struct bond_slave *slave)
 {
     list_remove(&slave->bal_node);
     insert_bal(bals, slave);
@@ -835,7 +835,7 @@ bond_rebalance(struct bond *bond)
 {
     struct bond_slave *slave;
     struct bond_entry *e;
-    struct list bals;
+    struct clist bals;
 
     ovs_rwlock_wrlock(&rwlock);
     if (!bond_is_balanced(bond) || time_msec() < bond->next_rebalance) {
