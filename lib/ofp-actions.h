@@ -25,6 +25,10 @@
 #include "openflow/nicira-ext.h"
 #include "openvswitch/types.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /* List of OVS abstracted actions.
  *
  * This macro is used directly only internally by this header, but the list is
@@ -166,13 +170,13 @@ BUILD_ASSERT_DECL(sizeof(struct ofpact) == 4);
 static inline struct ofpact *
 ofpact_next(const struct ofpact *ofpact)
 {
-    return (void *) ((uint8_t *) ofpact + OFPACT_ALIGN(ofpact->len));
+    return (struct ofpact *) ((uint8_t *) ofpact + OFPACT_ALIGN(ofpact->len));
 }
 
 static inline struct ofpact *
 ofpact_end(const struct ofpact *ofpacts, size_t ofpacts_len)
 {
-    return (void *) ((uint8_t *) ofpacts + ofpacts_len);
+    return (struct ofpact *) ((uint8_t *) ofpacts + ofpacts_len);
 }
 
 /* Assigns POS to each ofpact, in turn, in the OFPACTS_LEN bytes of ofpacts
@@ -589,7 +593,7 @@ void *ofpact_put(struct ofpbuf *, enum ofpact_type, size_t len);
     static inline struct STRUCT *                                       \
     ofpact_put_##ENUM(struct ofpbuf *ofpacts)                           \
     {                                                                   \
-        return ofpact_put(ofpacts, OFPACT_##ENUM,                       \
+        return (struct STRUCT *)ofpact_put(ofpacts, OFPACT_##ENUM,                       \
                           OFPACT_##ENUM##_RAW_SIZE);                    \
     }                                                                   \
                                                                         \
@@ -654,5 +658,9 @@ enum ovs_instruction_type ovs_instruction_type_from_ofpact_type(
 
 void ofpact_set_field_init(struct ofpact_reg_load *load,
                            const struct mf_field *mf, const void *src);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* ofp-actions.h */

@@ -5,9 +5,9 @@ LIB_DIR = $(TOP_DIR)/build/lib
 OUT_DIR = $(TOP_DIR)/build/bin
 CONF_DIR = $(TOP_DIR)/build/conf
 INC = -I ../lib -I ../include -I ..
-LDFLAGS +=  -std=gnu++0x -L .. -lofp -lpthread -lssl -lrt -lm
+LDFLAGS +=  -std=gnu++0x ../libofp.a -lpthread -lssl -lrt -lm
 CFLAGS += -Wall -g -O0 $(INC)
-CXXFLAGS += $(CFLAGS) -std=gnu++0x
+CXXFLAGS += $(CFLAGS) -std=gnu++0x -D__STDC_LIMIT_MACROS=1
 
 SRCS=$(wildcard *.cc)
 OBJS=$(patsubst %.cc, %.o, $(SRCS))

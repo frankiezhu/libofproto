@@ -45,6 +45,11 @@
 
 struct clist;
 
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /* Raw identifiers for OpenFlow messages.
  *
  * Some OpenFlow messages with similar meanings have multiple variants across
@@ -630,5 +635,9 @@ void ofpmp_postappend(struct clist *, size_t start_ofs);
 /* Decoding multipart replies. */
 uint16_t ofpmp_flags(const struct ofp_header *);
 bool ofpmp_more(const struct ofp_header *);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* ofp-msgs.h */
