@@ -17,6 +17,10 @@
 #ifndef MATCH_H
 #define MATCH_H 1
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #include "flow.h"
 
 struct ds;
@@ -157,5 +161,9 @@ uint32_t minimatch_hash(const struct minimatch *, uint32_t basis);
 void minimatch_format(const struct minimatch *, struct ds *,
                       unsigned int priority);
 char *minimatch_to_string(const struct minimatch *, unsigned int priority);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* match.h */
