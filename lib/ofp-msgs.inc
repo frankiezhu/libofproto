@@ -2554,9 +2554,9 @@ static struct raw_info raw_infos[] = {
         ofpraw_tenxt_gw_fdbs_rep_instances,
         1, 4,
 #line 393 "./lib/ofp-msgs.h"
-        sizeof(struct ofp_tencent_gw_fdb_rep),
-#line 393 "./lib/ofp-msgs.h"
         0,
+#line 393 "./lib/ofp-msgs.h"
+        sizeof(struct tenxt_gw_fdb),
 #line 2561 "lib/ofp-msgs.inc"
         OFPTYPE_TENXT_GW_FDBS_REP,
         "TENXT_GW_FDBS_REP",

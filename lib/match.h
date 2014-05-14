@@ -17,11 +17,11 @@
 #ifndef MATCH_H
 #define MATCH_H 1
 
+#include "flow.h"
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
-#include "flow.h"
 
 struct ds;
 

@@ -28,6 +28,10 @@
 struct ds;
 struct match;
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /* The comment on each of these indicates the member in "union mf_value" used
  * to represent its value. */
 enum mf_field_id {
@@ -395,5 +399,9 @@ void mf_format(const struct mf_field *,
                const union mf_value *value, const union mf_value *mask,
                struct ds *);
 void mf_format_subvalue(const union mf_subvalue *subvalue, struct ds *s);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* meta-flow.h */

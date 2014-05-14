@@ -33,6 +33,10 @@ struct miniflow;
 struct minimask;
 struct ofpbuf;
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /* This sequence number should be incremented whenever anything involving flows
  * or the wildcarding of flows changes.  This will cause build assertion
  * failures in places which likely need to be updated. */
@@ -367,5 +371,8 @@ uint32_t minimask_hash(const struct minimask *, uint32_t basis);
 
 bool minimask_has_extra(const struct minimask *, const struct minimask *);
 bool minimask_is_catchall(const struct minimask *);
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* flow.h */
